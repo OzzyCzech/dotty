@@ -1,0 +1,7 @@
+{
+  "name": "Ghostty",
+  "paths": [
+    "~/Library/Application Support/com.mitchellh.ghostty/config",
+    "~/.config/ghostty/config"
+  ]
+}

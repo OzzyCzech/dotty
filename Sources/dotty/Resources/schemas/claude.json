@@ -1,0 +1,8 @@
+{
+  "name": "Claude",
+  "paths": [
+    "~/.claude/settings.json",
+    "~/.claude/commands",
+    "~/.claude/skills"
+  ]
+}

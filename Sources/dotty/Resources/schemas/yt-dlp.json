@@ -1,0 +1,6 @@
+{
+  "name": "Youtube Downloader",
+  "paths": [
+    "~/.config/yt-dlp.conf"
+  ]
+}

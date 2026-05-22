@@ -1,0 +1,11 @@
+{
+  "name": "Cursor",
+  "paths": [
+    "~/Library/Application Support/Cursor/User/snippets",
+    "~/Library/Application Support/Cursor/User/settings.json",
+    "~/Library/Application Support/Cursor/User/keybindings.json",
+    "~/.config/Cursor/User/snippets",
+    "~/.config/Cursor/User/settings.json",
+    "~/.config/Cursor/User/keybindings.json"
+  ]
+}

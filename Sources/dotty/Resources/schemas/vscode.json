@@ -1,0 +1,13 @@
+{
+  "name": "Visual Studio Code",
+  "paths": [
+    "~/Library/Application Support/Code/User/settings.json",
+    "~/Library/Application Support/Code/User/keybindings.json",
+    "~/Library/Application Support/Code/User/snippets",
+    "~/Library/Application Support/Code/User/prompts",
+    "~/.config/Code/User/snippets",
+    "~/.config/Code/User/prompts",
+    "~/.config/Code/User/keybindings.json",
+    "~/.config/Code/User/settings.json"
+  ]
+}

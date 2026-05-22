@@ -1,0 +1,6 @@
+{
+  "name": "Ack",
+  "paths": [
+    "~/.ackrc"
+  ]
+}

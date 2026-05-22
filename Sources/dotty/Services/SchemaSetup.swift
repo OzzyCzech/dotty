@@ -18,11 +18,10 @@ enum SchemaSetup {
         struct Payload: Codable {
             let name: String
             let category: String?
-            let strategy: SyncStrategy?
             let destination: String?
             let paths: [PathSpec]
         }
-        let payload = Payload(name: schema.name, category: schema.category, strategy: schema.strategy, destination: schema.destination, paths: schema.paths)
+        let payload = Payload(name: schema.name, category: schema.category, destination: schema.destination, paths: schema.paths)
         let data = try encoder.encode(payload)
         try data.write(to: url)
     }

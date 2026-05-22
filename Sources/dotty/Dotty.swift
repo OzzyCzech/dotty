@@ -4,8 +4,8 @@ import ArgumentParser
 struct Dotty: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "dotty",
-        abstract: "Back up, restore, and sync application config files.",
-        version: "0.7.2",
+        abstract: "Manage dotfiles with symlinks to a destination directory (typically a git repo).",
+        version: "0.8.0",
         subcommands: [
             InitCommand.self,
             ReinitCommand.self,
@@ -15,9 +15,8 @@ struct Dotty: ParsableCommand {
             ListCommand.self,
             SchemasCommand.self,
             DoctorCommand.self,
+            LinkCommand.self,
             SnapshotCommand.self,
-            AdoptCommand.self,
-            DeployCommand.self,
         ]
     )
 }

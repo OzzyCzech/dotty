@@ -4,9 +4,8 @@ import Darwin
 #endif
 
 enum SyncOperation {
-    case snapshot   // home → destination, always copy (ignores strategy)
-    case adopt      // home → destination, per strategy (move+symlink for link paths)
-    case deploy     // destination → home, per strategy
+    case link       // ensure home reflects destination via symlinks (move-or-link state machine)
+    case snapshot   // pure copy home → destination
 }
 
 final class SyncEngine {
@@ -24,71 +23,30 @@ final class SyncEngine {
         self.verbose = verbose
     }
 
-    func run(operation: SyncOperation, schema: AppSchema, backupDir: URL) {
+    func run(operation: SyncOperation, schema: AppSchema, destinationDir: URL) {
         print(schema.name)
-        if operation != .deploy, !dryRun {
-            try? fm.createDirectory(at: backupDir, withIntermediateDirectories: true)
+        if !dryRun {
+            try? fm.createDirectory(at: destinationDir, withIntermediateDirectories: true)
         }
         for spec in schema.paths {
-            let effective: SyncStrategy = (operation == .snapshot)
-                ? .copy
-                : spec.resolvedStrategy(default: schema.strategy)
             let src = URL(fileURLWithPath: Paths.expand(spec.source))
-            let backup = backupDir.appendingPathComponent(spec.resolvedTarget())
+            let dest = destinationDir.appendingPathComponent(spec.resolvedTarget())
             let outcome: CopyOutcome
-            switch effective {
+            switch operation {
             case .link:
-                outcome = ensureLink(source: src, backup: backup, operation: operation)
-            case .copy:
-                outcome = (operation == .deploy)
-                    ? copyOne(from: backup, to: src)
-                    : copyOne(from: src, to: backup)
+                outcome = ensureLink(source: src, destination: dest)
+            case .snapshot:
+                outcome = snapshotOne(src: src, dest: dest)
             }
-            report(path: src.path, outcome: outcome, strategy: effective)
+            report(path: src.path, outcome: outcome)
         }
     }
 
-    /// Returns the fully-resolved on-disk path via POSIX realpath (follows ALL
-    /// symlinks, including the leaf). Returns nil if the path doesn't exist.
-    /// Swift's URL.resolvingSymlinksInPath only resolves directory components,
-    /// not a symlink leaf — which would miss the "src is a symlink to dest" case.
-    private func resolvedPath(_ url: URL) -> String? {
-        var buf = [CChar](repeating: 0, count: Int(PATH_MAX))
-        guard realpath(url.path, &buf) != nil else { return nil }
-        return String(cString: buf)
-    }
+    // MARK: - link operation (state machine)
 
-    private func copyOne(from src: URL, to dest: URL) -> CopyOutcome {
-        guard fm.fileExists(atPath: src.path) else {
-            return .skipped(reason: "not found")
-        }
-
-        // Safety: if src resolves to the same file as dest (typically because
-        // src is a symlink that already points at dest), refuse to delete-then-copy.
-        // Without this guard we would unlink the file the symlink points to, then
-        // fail to copy from a now-broken source.
-        if let srcResolved = resolvedPath(src),
-           let destResolved = resolvedPath(dest),
-           srcResolved == destResolved {
-            return .skipped(reason: "already in place")
-        }
-
-        if dryRun { return .copied }
-        do {
-            try fm.createDirectory(at: dest.deletingLastPathComponent(), withIntermediateDirectories: true)
-            if fm.fileExists(atPath: dest.path) || isSymlink(dest) {
-                try fm.removeItem(at: dest)
-            }
-            try fm.copyItem(at: src, to: dest)
-            return .copied
-        } catch {
-            return .failed(error)
-        }
-    }
-
-    private func ensureLink(source: URL, backup: URL, operation: SyncOperation) -> CopyOutcome {
+    private func ensureLink(source: URL, destination: URL) -> CopyOutcome {
         let srcIsSymlink = isSymlink(source)
-        let backupExists = fm.fileExists(atPath: backup.path)
+        let destExists = fm.fileExists(atPath: destination.path)
 
         // Source is a symlink — inspect where it points.
         if srcIsSymlink {
@@ -96,7 +54,7 @@ final class SyncEngine {
                 return .skipped(reason: "unreadable symlink")
             }
             let resolvedTarget = URL(fileURLWithPath: target, relativeTo: source.deletingLastPathComponent()).standardizedFileURL
-            if resolvedTarget.path == backup.standardizedFileURL.path {
+            if resolvedTarget.path == destination.standardizedFileURL.path {
                 return .skipped(reason: "already linked")
             }
             if !fm.fileExists(atPath: resolvedTarget.path) {
@@ -106,25 +64,22 @@ final class SyncEngine {
         }
 
         let srcExistsReal = fm.fileExists(atPath: source.path)
-        switch (srcExistsReal, backupExists, operation) {
-        case (false, true, _):
-            return createSymlink(at: source, target: backup)
-        case (true, false, .adopt):
+        switch (srcExistsReal, destExists) {
+        case (false, true):
+            return createSymlink(at: source, target: destination)
+        case (true, false):
+            // Bootstrap: move home file → destination, then symlink.
             if dryRun { return .linked }
             do {
-                try fm.createDirectory(at: backup.deletingLastPathComponent(), withIntermediateDirectories: true)
-                try fm.moveItem(at: source, to: backup)
-                return createSymlink(at: source, target: backup)
+                try fm.createDirectory(at: destination.deletingLastPathComponent(), withIntermediateDirectories: true)
+                try fm.moveItem(at: source, to: destination)
+                return createSymlink(at: source, target: destination)
             } catch {
                 return .failed(error)
             }
-        case (true, false, .deploy):
-            return .skipped(reason: "destination empty — run `dotty adopt` first")
-        case (true, false, .snapshot):
-            return .skipped(reason: "unexpected (snapshot uses copy path)")
-        case (true, true, _):
+        case (true, true):
             return .skipped(reason: "conflict: both source and destination exist; resolve manually")
-        case (false, false, _):
+        case (false, false):
             return .skipped(reason: "not found")
         }
     }
@@ -143,12 +98,46 @@ final class SyncEngine {
         }
     }
 
+    // MARK: - snapshot operation (pure copy home → destination)
+
+    private func snapshotOne(src: URL, dest: URL) -> CopyOutcome {
+        guard fm.fileExists(atPath: src.path) else {
+            return .skipped(reason: "not found")
+        }
+        // Safety: if src resolves to the same file as dest (src is a symlink already pointing
+        // at dest), refuse to delete-then-copy. POSIX realpath follows symlink leaves.
+        if let srcResolved = resolvedPath(src),
+           let destResolved = resolvedPath(dest),
+           srcResolved == destResolved {
+            return .skipped(reason: "already in place")
+        }
+        if dryRun { return .copied }
+        do {
+            try fm.createDirectory(at: dest.deletingLastPathComponent(), withIntermediateDirectories: true)
+            if fm.fileExists(atPath: dest.path) || isSymlink(dest) {
+                try fm.removeItem(at: dest)
+            }
+            try fm.copyItem(at: src, to: dest)
+            return .copied
+        } catch {
+            return .failed(error)
+        }
+    }
+
+    private func resolvedPath(_ url: URL) -> String? {
+        var buf = [CChar](repeating: 0, count: Int(PATH_MAX))
+        guard realpath(url.path, &buf) != nil else { return nil }
+        return String(cString: buf)
+    }
+
     private func isSymlink(_ url: URL) -> Bool {
         let attrs = try? fm.attributesOfItem(atPath: url.path)
         return (attrs?[.type] as? FileAttributeType) == .typeSymbolicLink
     }
 
-    private func report(path: String, outcome: CopyOutcome, strategy: SyncStrategy) {
+    // MARK: - reporting
+
+    private func report(path: String, outcome: CopyOutcome) {
         let display = Paths.short(path)
         let tag = dryRun ? "  \(Ansi.dim("(dry-run)"))" : ""
         switch outcome {
@@ -159,7 +148,8 @@ final class SyncEngine {
             print("  \(Ansi.cyan("↪")) \(display)\(tag)")
             linked += 1
         case .skipped(let reason):
-            if verbose || (reason != "not found" && reason != "already linked" && reason != "already in place") {
+            let quiet = reason == "not found" || reason == "already linked" || reason == "already in place"
+            if verbose || !quiet {
                 print("  \(Ansi.dim("−")) \(display)  \(Ansi.dim("(\(reason))"))")
             } else if reason == "already linked" || reason == "already in place" {
                 print("  \(Ansi.dim("=")) \(display)  \(Ansi.dim("(\(reason))"))")

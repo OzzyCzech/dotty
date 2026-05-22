@@ -80,30 +80,29 @@ struct DoctorCommand: ParsableCommand {
         if !installed {
             findings.append(Finding(text: Ansi.dim("not installed"), isError: false))
         }
-        let backupDir = registry.backupDir(for: schema)
+        let destinationDir = registry.destinationDir(for: schema)
         for spec in schema.paths {
             let expanded = Paths.expand(spec.source)
             let exists = fm.fileExists(atPath: expanded)
             let attrs = try? fm.attributesOfItem(atPath: expanded)
             let isLink = (attrs?[.type] as? FileAttributeType) == .typeSymbolicLink
-            let backupPath = backupDir.appendingPathComponent(spec.resolvedTarget())
-            let backupExists = fm.fileExists(atPath: backupPath.path)
+            let destPath = destinationDir.appendingPathComponent(spec.resolvedTarget())
+            let destExistsForPath = fm.fileExists(atPath: destPath.path)
 
             if isLink {
                 if let dest = try? fm.destinationOfSymbolicLink(atPath: expanded) {
                     let resolved = URL(fileURLWithPath: dest, relativeTo: URL(fileURLWithPath: expanded).deletingLastPathComponent()).standardizedFileURL
                     if !fm.fileExists(atPath: resolved.path) {
                         findings.append(Finding(text: "\(Ansi.yellow("✗")) broken symlink: \(Paths.short(expanded)) → \(dest)", isError: true))
-                    } else if resolved.path == backupPath.standardizedFileURL.path {
+                    } else if resolved.path == destPath.standardizedFileURL.path {
                         findings.append(Finding(text: "\(Ansi.cyan("↪")) linked: \(Paths.short(expanded))", isError: false))
                     } else {
-                        findings.append(Finding(text: "\(Ansi.dim("·")) symlink to non-backup: \(Paths.short(expanded)) → \(Paths.short(resolved.path))", isError: false))
+                        findings.append(Finding(text: "\(Ansi.dim("·")) symlink elsewhere: \(Paths.short(expanded)) → \(Paths.short(resolved.path))", isError: false))
                     }
                 }
             } else if !exists && installed {
                 findings.append(Finding(text: "\(Ansi.yellow("⚠")) missing: \(Paths.short(expanded))", isError: true))
-            } else if exists && backupExists {
-                // both present — fine in copy mode, conflict in link mode
+            } else if exists && destExistsForPath {
                 continue
             } else if exists {
                 continue

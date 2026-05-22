@@ -59,11 +59,10 @@ struct SchemasCommand: ParsableCommand {
         struct Payload: Codable {
             let name: String
             let category: String?
-            let strategy: SyncStrategy?
             let destination: String?
             let paths: [PathSpec]
         }
-        let payload = Payload(name: schema.name, category: schema.category, strategy: schema.strategy, destination: schema.destination, paths: schema.paths)
+        let payload = Payload(name: schema.name, category: schema.category, destination: schema.destination, paths: schema.paths)
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         let data = try encoder.encode(payload)

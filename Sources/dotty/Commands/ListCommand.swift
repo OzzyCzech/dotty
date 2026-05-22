@@ -70,17 +70,7 @@ struct ListCommand: ParsableCommand {
                 let pad = String(repeating: " ", count: max(0, maxID - schema.id.count))
                 let id = isInstalled ? schema.id : Ansi.dim(schema.id)
                 let name = isInstalled ? schema.name : Ansi.dim(schema.name)
-                let modeTag: String = {
-                    let hasLink = schema.hasLinkPaths()
-                    let hasCopy = schema.hasCopyPaths()
-                    switch (hasLink, hasCopy) {
-                    case (true, true):   return "  " + Ansi.dim("mixed")
-                    case (true, false):  return "  " + Ansi.dim("link")
-                    case (false, true):  return ""
-                    case (false, false): return ""
-                    }
-                }()
-                print("  \(marker) \(id)\(pad)  \(name)\(modeTag)")
+                print("  \(marker) \(id)\(pad)  \(name)")
             }
         }
 

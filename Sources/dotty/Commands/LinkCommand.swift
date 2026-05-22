@@ -1,20 +1,22 @@
 import ArgumentParser
 import Foundation
 
-struct AdoptCommand: ParsableCommand {
+struct LinkCommand: ParsableCommand {
     static let configuration = CommandConfiguration(
-        commandName: "adopt",
-        abstract: "Take home dotfiles under management — move into destination + symlink back.",
+        commandName: "link",
+        abstract: "Wire up home with symlinks to the destination directory.",
         discussion: """
-        One-time bootstrap. For link-strategy paths the source file is moved into
-        the destination directory and replaced with a symlink (so you can put the
-        destination in git and edit through the symlink). Copy-strategy paths are
-        copied without modifying home. Idempotent — already-adopted paths are
-        skipped.
+        Idempotent. For each path declared in your schemas dotty figures out
+        what to do from current on-disk state:
+
+          • home file exists, destination empty  → move home → destination + symlink
+          • destination exists, home empty       → create symlink pointing at destination
+          • home already symlinks to destination → no-op
+          • both home and destination exist      → conflict, asks you to resolve manually
         """
     )
 
-    @Argument(help: "App identifier (omit to adopt all installed apps).")
+    @Argument(help: "App identifier (omit to link all configured apps).")
     var app: String?
 
     @Flag(name: .long, help: "Preview without writing.")
@@ -33,13 +35,13 @@ struct AdoptCommand: ParsableCommand {
             }
             targets = [schema]
         } else {
-            targets = registry.all().filter { AppDetector.isInstalled($0) }
+            targets = registry.all()
         }
 
         let engine = SyncEngine(dryRun: dryRun, verbose: verbose)
         for (i, schema) in targets.enumerated() {
             if i > 0 { print() }
-            engine.run(operation: .adopt, schema: schema, backupDir: registry.backupDir(for: schema))
+            engine.run(operation: .link, schema: schema, destinationDir: registry.destinationDir(for: schema))
         }
         engine.summary()
         if engine.failed > 0 { throw ExitCode(2) }

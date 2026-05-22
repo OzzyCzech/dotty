@@ -1,12 +1,11 @@
 # dotty
 
-A Swift CLI for backing up, restoring, and syncing application config files on macOS.
+A Swift CLI that wires up macOS dotfiles with symlinks into a destination directory (typically a git repo) so you can version them.
 
-Three commands cover the lifecycle:
+Two operations:
 
-- **`dotty snapshot`** — safety copy. Duplicates home dotfiles into the destination directory. Home is untouched. Strategy is ignored — everything is copied.
-- **`dotty adopt`** — bootstrap. Moves home dotfiles into the destination directory and replaces them with symlinks (for link-strategy paths). Set this up once, then put the destination directory in git and edit through the symlinks.
-- **`dotty deploy`** — apply destination to home. Creates symlinks (link strategy) or copies files (copy strategy). Use on a fresh Mac.
+- **`dotty link`** — the main command. Ensures every path declared in your schemas is a symlink from home into the destination directory. Idempotent — figures out from on-disk state what to do (move home file → destination + symlink, or create symlink only, or no-op).
+- **`dotty snapshot`** — escape hatch for the rare path that does not symlink well (binary plists, machine-specific configs). Pure copy home → destination; home is untouched.
 
 ## Install
 
@@ -48,17 +47,21 @@ dotty schemas               # browse bundled schemas
 dotty schemas zed           # print one schema's JSON
 dotty doctor                # health check
 
-dotty snapshot              # home → destination (pure copy; safety net)
-dotty snapshot zed --dry-run
+dotty link                  # wire up all configured apps (idempotent)
+dotty link zed              # one app
+dotty link --dry-run        # preview
 
-dotty adopt                 # one-time bootstrap: move home → destination + symlink back
-dotty adopt zed
-
-dotty deploy                # destination → home (symlinks for link strategy, copies for copy strategy)
-dotty deploy zed --force    # no per-app prompt
+dotty snapshot              # plain copy home → destination (no symlinks)
 ```
 
-For each path, dotty does the right thing based on its **strategy**: `link` paths become symlinks pointing at the destination directory (so edits go straight to your git repo); `copy` paths are duplicated. `snapshot` is the escape hatch that always copies.
+`link` is the only operation you typically run. It detects the on-disk state per path:
+
+| home | destination | result |
+|---|---|---|
+| real file | empty | move home → destination + symlink |
+| empty | real file/dir | create symlink → destination |
+| symlink → destination | — | no-op (already linked) |
+| both populated | — | conflict; you resolve manually |
 
 ## Configuration
 
@@ -88,51 +91,27 @@ An app schema:
 }
 ```
 
-### Sync strategy
-
-Every path is either `copy` (snapshot) or `link` (symlink to the backup). Default is `copy`. Set `strategy` at three levels:
-
-```json
-{
-  "name": "Roman's dotfiles",
-  "strategy": "link",                                              // default for the whole schema
-  "paths": [
-    "~/.zshrc",                                                    // inherits schema strategy (link)
-    { "source": "~/.gitconfig", "strategy": "copy" },              // per-path override
-    { "source": "~/.bin", "target": "bin" },                       // rename + link
-    { "source": "~/.config/zed", "target": "configs/.config/zed", "strategy": "copy" }
-  ]
-}
-```
-
-Resolution order: `path.strategy` ► `schema.strategy` ► `copy`.
-
 ### Path mappings (renaming)
 
-By default each path is mirrored — `~/.zshrc` ends up at `<backup>/.zshrc`. To store a source under a renamed location inside the backup directory (e.g. for an existing `~/.dotfiles` layout), set `target` in the object form. `target` is always relative to the backup directory; absolute paths and `..` are rejected at load time. Use the schema-level `destination` field to relocate the entire backup root for that app.
-
-#### Example: wiring dotty into an existing `~/.dotfiles` repo
-
-Drop `~/.dotty/dotfiles.json`:
+By default each path is mirrored — `~/.zshrc` ends up at `<destination>/.zshrc`. To store a source under a renamed location inside the destination (e.g. for an existing `~/.dotfiles` layout that uses different names), use the object form:
 
 ```json
 {
   "name": "My dotfiles",
-  "category": "Other",
-  "strategy": "link",
   "destination": "~/.dotfiles",
   "paths": [
     "~/.zshrc",
     "~/.p10k.zsh",
     "~/.gitignore",
     { "source": "~/.bin", "target": "bin" },
-    { "source": "~/.zsh", "target": "zsh" },
-    { "source": "~/.gitconfig", "strategy": "copy" }
+    { "source": "~/.zsh", "target": "zsh" }
   ]
 }
 ```
 
-Then `dotty adopt dotfiles --dry-run` previews the move + symlink step (run once on the machine where the dotfiles currently live); `dotty deploy dotfiles --dry-run` previews wiring up symlinks on a fresh machine where the destination is already populated. Existing symlinks pointing at the right target are no-ops.
+`target` is always relative to the destination directory; absolute paths and `..` are rejected at load time. Use the schema-level `destination` to relocate the destination root for this app only.
+
+Then `dotty link dotfiles --dry-run` previews; `dotty link dotfiles` performs the move + symlink. Re-runs are no-ops on already-linked paths.
 
 ## Built-in apps
 
@@ -140,7 +119,7 @@ Then `dotty adopt dotfiles --dry-run` previews the move + symlink step (run once
 |---|---|
 | **Editors** | [Zed](Sources/dotty/Resources/schemas/zed.json) · [Visual Studio Code](Sources/dotty/Resources/schemas/vscode.json) · [Cursor](Sources/dotty/Resources/schemas/cursor.json) · [Vim](Sources/dotty/Resources/schemas/vim.json) · [Neovim](Sources/dotty/Resources/schemas/neovim.json) |
 | **AI tools** | [Claude](Sources/dotty/Resources/schemas/claude.json) · [Codex CLI](Sources/dotty/Resources/schemas/codex.json) · [Gemini CLI](Sources/dotty/Resources/schemas/gemini.json) · [Aider](Sources/dotty/Resources/schemas/aider.json) · [OpenCode](Sources/dotty/Resources/schemas/opencode.json) · [Goose](Sources/dotty/Resources/schemas/goose.json) · [Crush](Sources/dotty/Resources/schemas/crush.json) · [Continue](Sources/dotty/Resources/schemas/continue.json) · [GitHub Copilot](Sources/dotty/Resources/schemas/github-copilot.json) · [Antigravity](Sources/dotty/Resources/schemas/antigravity.json) · [Windsurf](Sources/dotty/Resources/schemas/windsurf.json) · [Trae](Sources/dotty/Resources/schemas/trae.json) |
-| **Terminals** | [Terminal](Sources/dotty/Resources/schemas/terminal.json) · [Ghostty](Sources/dotty/Resources/schemas/ghostty.json) · [Warp](Sources/dotty/Resources/schemas/warp.json) · [Alacritty](Sources/dotty/Resources/schemas/alacritty.json) · [Kitty](Sources/dotty/Resources/schemas/kitty.json) · [WezTerm](Sources/dotty/Resources/schemas/wezterm.json) · [cmux](Sources/dotty/Resources/schemas/cmux.json) |
+| **Terminals** | [Ghostty](Sources/dotty/Resources/schemas/ghostty.json) · [Warp](Sources/dotty/Resources/schemas/warp.json) · [Alacritty](Sources/dotty/Resources/schemas/alacritty.json) · [Kitty](Sources/dotty/Resources/schemas/kitty.json) · [WezTerm](Sources/dotty/Resources/schemas/wezterm.json) · [cmux](Sources/dotty/Resources/schemas/cmux.json) |
 | **Shell & prompt** | [Bash](Sources/dotty/Resources/schemas/bash.json) · [Zsh](Sources/dotty/Resources/schemas/zsh.json) · [Fish](Sources/dotty/Resources/schemas/fish.json) · [tmux](Sources/dotty/Resources/schemas/tmux.json) · [Starship](Sources/dotty/Resources/schemas/starship.json) · [Powerlevel10k](Sources/dotty/Resources/schemas/powerlevel10k.json) · [Antidote](Sources/dotty/Resources/schemas/antidote.json) |
 | **Git** | [Git](Sources/dotty/Resources/schemas/git.json) · [GitHub CLI](Sources/dotty/Resources/schemas/gh.json) · [Lazygit](Sources/dotty/Resources/schemas/lazygit.json) |
 | **Languages** | [npm](Sources/dotty/Resources/schemas/npm.json) · [Yarn](Sources/dotty/Resources/schemas/yarn.json) · [pnpm](Sources/dotty/Resources/schemas/pnpm.json) · [nvm](Sources/dotty/Resources/schemas/nvm.json) · [asdf](Sources/dotty/Resources/schemas/asdf.json) · [Cargo](Sources/dotty/Resources/schemas/cargo.json) · [Ruby](Sources/dotty/Resources/schemas/ruby.json) · [Composer](Sources/dotty/Resources/schemas/composer.json) |

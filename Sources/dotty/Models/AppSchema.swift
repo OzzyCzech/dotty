@@ -6,19 +6,17 @@ struct AppSchema: Codable, Equatable {
     let paths: [PathSpec]
     let destination: String?
     let category: String?
-    let strategy: SyncStrategy?
 
     enum CodingKeys: String, CodingKey {
-        case id, name, paths, destination, category, strategy
+        case id, name, paths, destination, category
     }
 
-    init(id: String, name: String, paths: [PathSpec], destination: String? = nil, category: String? = nil, strategy: SyncStrategy? = nil) {
+    init(id: String, name: String, paths: [PathSpec], destination: String? = nil, category: String? = nil) {
         self.id = id
         self.name = name
         self.paths = paths
         self.destination = destination
         self.category = category
-        self.strategy = strategy
     }
 
     init(from decoder: Decoder) throws {
@@ -28,11 +26,10 @@ struct AppSchema: Codable, Equatable {
         self.paths = try c.decode([PathSpec].self, forKey: .paths)
         self.destination = try? c.decode(String.self, forKey: .destination)
         self.category = try? c.decode(String.self, forKey: .category)
-        self.strategy = try? c.decode(SyncStrategy.self, forKey: .strategy)
     }
 
     func with(id newID: String) -> AppSchema {
-        AppSchema(id: newID, name: name, paths: paths, destination: destination, category: category, strategy: strategy)
+        AppSchema(id: newID, name: name, paths: paths, destination: destination, category: category)
     }
 
     func validate() throws {
@@ -44,13 +41,5 @@ struct AppSchema: Codable, Equatable {
                 throw PathSpecError.duplicateTargets(resolved)
             }
         }
-    }
-
-    func hasLinkPaths() -> Bool {
-        paths.contains { $0.resolvedStrategy(default: strategy) == .link }
-    }
-
-    func hasCopyPaths() -> Bool {
-        paths.contains { $0.resolvedStrategy(default: strategy) == .copy }
     }
 }

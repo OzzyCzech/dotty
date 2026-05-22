@@ -5,7 +5,7 @@ struct Dotty: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "dotty",
         abstract: "Manage dotfiles with symlinks to a destination directory (typically a git repo).",
-        version: "0.8.1",
+        version: "0.8.2",
         subcommands: [
             InitCommand.self,
             ReinitCommand.self,

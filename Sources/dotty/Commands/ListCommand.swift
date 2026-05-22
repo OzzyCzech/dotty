@@ -78,5 +78,6 @@ struct ListCommand: ParsableCommand {
         let total = filtered.count
         let notInstalled = total - installedCount
         print(Ansi.dim("\(total) configured apps · \(installedCount) installed · \(notInstalled) not installed"))
+        print(Ansi.dim("Schemas: \(Paths.dottyDirDisplay())"))
     }
 }

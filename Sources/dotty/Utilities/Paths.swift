@@ -36,4 +36,15 @@ enum Paths {
     static var defaultBackupDir: URL {
         dottyDir.appendingPathComponent("backup")
     }
+
+    /// Display string for ~/.dotty showing the resolved location when it is a
+    /// symlink. Returns just the short path when it isn't, or doesn't exist yet.
+    static func dottyDirDisplay() -> String {
+        let dotty = dottyDir
+        let resolved = dotty.resolvingSymlinksInPath()
+        if resolved.path == dotty.path {
+            return short(dotty.path)
+        }
+        return "\(short(dotty.path)) → \(short(resolved.path))"
+    }
 }

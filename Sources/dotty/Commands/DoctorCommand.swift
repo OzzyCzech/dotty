@@ -20,6 +20,7 @@ struct DoctorCommand: ParsableCommand {
         let destMark = destExists ? Ansi.green("✓") : Ansi.yellow("○")
         let destNote = destExists ? Ansi.dim("exists") : Ansi.dim("(created automatically on first save)")
         print("  \(destMark) \(registry.config.destination)  \(destNote)")
+        print("  \(Ansi.dim("·")) schemas: \(Paths.dottyDirDisplay())")
         print()
 
         var totalIssues = 0

@@ -36,11 +36,12 @@ cp .build/release/dotty /usr/local/bin/
 ## Usage
 
 ```sh
-dotty init                              # interactive: pick installed apps to enable
-dotty init --yes                        # non-interactive, accept all detected apps
+dotty init                              # interactive: pick apps, copy templates into ~/.dotty/
+dotty init --yes                        # non-interactive, copy every detected app
 dotty init --destination ~/Dropbox/dot  # skip the destination prompt
-dotty list                              # all known apps, grouped
-dotty list --installed --compact        # filter + one-line output
+dotty init --refresh                    # overwrite existing ~/.dotty/<id>.json files
+dotty list                              # configured apps in ~/.dotty/, grouped
+dotty list --available                  # browse bundled schema templates (read-only)
 dotty doctor                            # report broken links, missing files
 
 dotty save                  # push every installed app's config → backup
@@ -55,32 +56,28 @@ For each path, dotty does the right thing based on its **mode**: copy-mode paths
 
 ## Configuration
 
-`~/.dotty/config.json`:
+`~/.dotty/` is the single source of truth. After `dotty init`:
 
-```json
-{
-  "destination": "~/Dropbox/dotty",
-  "disabled": ["vim", "fish"],
-  "zed": {
-    "paths": ["~/.config/zed/settings.json", "~/.config/zed/keymap.json"]
-  },
-  "ghostty": {
-    "target": "~/iCloud/ghostty-backup"
-  }
-}
+```
+~/.dotty/
+├── config.json     # { "destination": "~/.dotfiles" }
+├── zed.json
+├── cursor.json
+├── ghostty.json
+└── …
 ```
 
-- `destination` — global backup root. Default `~/.dotty/backup`.
-- `enabled` — whitelist of built-in IDs to keep. When present, every other built-in is hidden. Use this when you want a small, curated set.
-- `disabled` — blacklist of built-in IDs to hide. Ignored if `enabled` is also set.
-- Either filter only affects built-ins. Explicit overrides here and standalone `~/.dotty/<id>.json` files always show up, so you can mix-and-match with your own additions.
-- App key (e.g. `"zed"`) — partial override (paths / target / name).
+- **`config.json`** holds only the `destination` — the directory where backups live (default `~/.dotty/backup`). That's it.
+- **`<id>.json` files** are the schemas dotty acts on. Each one is a complete, editable description of a single app's config paths. Delete a file to drop the app; add one to manage a new app.
 
-To add a new app without editing `config.json`, drop `~/.dotty/<id>.json`:
+Bundled schemas inside the dotty binary are **templates** used by `dotty init` to bootstrap `~/.dotty/`. They are not loaded at runtime — your local files are. Run `dotty list --available` to browse the bundled templates without modifying anything.
+
+An app schema:
 
 ```json
 {
   "name": "My Tool",
+  "category": "CLI Utilities",
   "paths": ["~/.config/mytool/conf.toml"]
 }
 ```
@@ -130,12 +127,6 @@ Drop `~/.dotty/dotfiles.json`:
 ```
 
 Then `dotty restore dotfiles --dry-run` previews the result; `dotty restore dotfiles --force` performs it. Existing symlinks pointing at the right target are no-ops.
-
-### Schema priority (highest first)
-
-1. `~/.dotty/<id>.json` — standalone, full replacement.
-2. App entry in `~/.dotty/config.json` — partial override (paths / target).
-3. Bundled built-in JSON inside the binary.
 
 ## Built-in apps
 

@@ -4,78 +4,120 @@ import Foundation
 struct InitCommand: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "init",
-        abstract: "Interactively create ~/.dotty/config.json — detects installed apps and writes an enabled whitelist."
+        abstract: "Interactively populate ~/.dotty/ with schemas for installed apps."
     )
 
-    @Option(name: .long, help: "Backup destination directory (skips destination prompt).")
+    @Option(name: .long, help: "Backup destination directory (skips the destination prompt).")
     var destination: String?
 
-    @Flag(name: .long, help: "Overwrite existing config without prompting.")
-    var force: Bool = false
+    @Flag(name: .long, help: "Overwrite existing ~/.dotty/<id>.json files.")
+    var refresh: Bool = false
 
-    @Flag(name: [.short, .long], help: "Accept all defaults — enable every detected app.")
+    @Flag(name: [.short, .long], help: "Accept all defaults — write a schema for every detected app.")
     var yes: Bool = false
 
     func run() throws {
         let fm = FileManager.default
         try fm.createDirectory(at: Paths.dottyDir, withIntermediateDirectories: true)
-        let configURL = Paths.configFile
 
-        if fm.fileExists(atPath: configURL.path) && !force {
-            if !Confirmation.ask("\(Paths.short(configURL.path)) exists. Overwrite?") {
-                print("Aborted.")
-                return
-            }
-        }
-
+        let existingConfig = DottyConfig.load()
         let destPath: String = {
             if let destination { return destination }
-            if yes { return DottyConfig.defaultDestination }
-            return Confirmation.askText("Backup destination", default: DottyConfig.defaultDestination)
+            if yes { return existingConfig.destination }
+            return Confirmation.askText("Backup destination", default: existingConfig.destination)
         }()
 
-        let registry = SchemaRegistry(config: DottyConfig.empty())
-        let installed = registry.all().filter { AppDetector.isInstalled($0) }
+        let builtins = SchemaRegistry.bundledBuiltins()
+        let installed = builtins.filter { AppDetector.isInstalled($0) }
 
         if installed.isEmpty {
-            print("No installed apps detected from built-in schemas.")
-            try writeConfig(url: configURL, destination: destPath, enabled: nil)
-            print("Wrote \(Paths.short(configURL.path)) (no apps enabled — edit it to add some).")
+            try writeRootConfig(destination: destPath)
+            print("Wrote \(Paths.short(Paths.configFile.path)) (no installed apps detected).")
             return
         }
 
-        var enabledIDs: [String]
+        let existingIDs = Set(loadExistingSchemaIDs())
+
+        let chosenIDs: [String]
         if yes || !InteractivePicker.isAvailable {
             print()
             print(Ansi.bold("Detected \(installed.count) installed apps"))
             printGrouped(installed)
             print()
-            enabledIDs = installed.map { $0.id }
+            var ids = installed.map { $0.id }
             if !yes {
                 if !Confirmation.ask("Enable all of them?", defaultYes: true) {
                     let excluded = Confirmation.askText("Enter IDs to EXCLUDE (space-separated)", default: "")
                     let drop = Set(excluded.split(separator: " ").map { $0.lowercased() })
-                    enabledIDs = enabledIDs.filter { !drop.contains($0) }
+                    ids = ids.filter { !drop.contains($0) }
                 }
             }
+            chosenIDs = ids
         } else {
             let rows = buildPickerRows(installed)
-            let allIDs = Set(installed.map { $0.id })
+            let preselected = existingIDs.isEmpty ? Set(installed.map { $0.id }) : existingIDs
             guard let picked = InteractivePicker.multiSelect(
-                title: "Detected \(installed.count) installed apps — pick which to enable",
+                title: "Detected \(installed.count) installed apps — pick which to manage",
                 rows: rows,
-                initiallySelected: allIDs
+                initiallySelected: preselected
             ) else {
                 print("Aborted.")
                 return
             }
-            enabledIDs = picked
+            chosenIDs = picked
         }
 
-        try writeConfig(url: configURL, destination: destPath, enabled: enabledIDs)
+        let chosen = Set(chosenIDs)
+        var written = 0
+        var skipped = 0
+        for schema in installed where chosen.contains(schema.id) {
+            let url = Paths.dottyDir.appendingPathComponent("\(schema.id).json")
+            if fm.fileExists(atPath: url.path) && !refresh {
+                skipped += 1
+                continue
+            }
+            try writeSchema(schema, to: url)
+            written += 1
+        }
+        try writeRootConfig(destination: destPath)
+
         print()
-        print("Wrote \(Paths.short(configURL.path)) with \(enabledIDs.count) enabled app\(enabledIDs.count == 1 ? "" : "s").")
-        print(Ansi.dim("Nothing was copied or linked. Run `dotty save` to push your current configs into the backup directory."))
+        print("Wrote \(Paths.short(Paths.configFile.path)) and \(written) schema file\(written == 1 ? "" : "s") in \(Paths.short(Paths.dottyDir.path))/.")
+        if skipped > 0 {
+            print(Ansi.dim("Skipped \(skipped) existing schema file\(skipped == 1 ? "" : "s") (rerun with --refresh to overwrite)."))
+        }
+        print(Ansi.dim("Nothing was copied or linked. Edit the schemas as needed, then run `dotty save`."))
+    }
+
+    private func loadExistingSchemaIDs() -> [String] {
+        let fm = FileManager.default
+        guard let entries = try? fm.contentsOfDirectory(at: Paths.dottyDir, includingPropertiesForKeys: nil) else { return [] }
+        return entries
+            .filter { $0.pathExtension == "json" }
+            .map { $0.deletingPathExtension().lastPathComponent.lowercased() }
+            .filter { $0 != "config" }
+    }
+
+    private func writeSchema(_ schema: AppSchema, to url: URL) throws {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        // Encode without the runtime-only `id` field.
+        struct Payload: Codable {
+            let name: String
+            let category: String?
+            let mode: SyncMode?
+            let target: String?
+            let paths: [PathSpec]
+        }
+        let payload = Payload(name: schema.name, category: schema.category, mode: schema.mode, target: schema.target, paths: schema.paths)
+        let data = try encoder.encode(payload)
+        try data.write(to: url)
+    }
+
+    private func writeRootConfig(destination: String) throws {
+        let payload: [String: Any] = ["destination": destination]
+        let data = try JSONSerialization.data(withJSONObject: payload, options: [.prettyPrinted, .sortedKeys])
+        try data.write(to: Paths.configFile)
     }
 
     private func buildPickerRows(_ schemas: [AppSchema]) -> [PickerRow] {
@@ -109,14 +151,5 @@ struct InitCommand: ParsableCommand {
                 print("  \(Ansi.green("●")) \(schema.id)\(pad)  \(Ansi.dim(schema.name))")
             }
         }
-    }
-
-    private func writeConfig(url: URL, destination: String, enabled: [String]?) throws {
-        var payload: [String: Any] = ["destination": destination]
-        if let enabled {
-            payload["enabled"] = enabled.sorted()
-        }
-        let data = try JSONSerialization.data(withJSONObject: payload, options: [.prettyPrinted, .sortedKeys])
-        try data.write(to: url)
     }
 }

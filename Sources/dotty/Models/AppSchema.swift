@@ -1,11 +1,5 @@
 import Foundation
 
-enum SchemaSource: String {
-    case builtin
-    case config
-    case standalone
-}
-
 struct AppSchema: Codable, Equatable {
     let id: String
     let name: String
@@ -61,9 +55,3 @@ struct AppSchema: Codable, Equatable {
     }
 }
 
-struct AppSchemaOverride: Codable {
-    let paths: [PathSpec]?
-    let target: String?
-    let name: String?
-    let mode: SyncMode?
-}

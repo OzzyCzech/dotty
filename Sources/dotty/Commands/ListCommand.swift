@@ -4,7 +4,7 @@ import Foundation
 struct ListCommand: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "list",
-        abstract: "Show all known apps grouped by category."
+        abstract: "Show configured apps in ~/.dotty/ (or use --available to browse bundled schemas)."
     )
 
     @Flag(name: .long, help: "Show only installed apps.")
@@ -13,8 +13,8 @@ struct ListCommand: ParsableCommand {
     @Flag(name: .long, help: "Show only apps that are not installed.")
     var missing: Bool = false
 
-    @Flag(name: .long, help: "Show only user-defined apps (config or standalone).")
-    var user: Bool = false
+    @Flag(name: .long, help: "Show bundled built-in schemas (templates available to `dotty init`), not the configured ones.")
+    var available: Bool = false
 
     @Flag(name: [.short, .long], help: "Compact one-line output (just identifiers).")
     var compact: Bool = false
@@ -33,22 +33,23 @@ struct ListCommand: ParsableCommand {
     ]
 
     func run() throws {
-        let registry = SchemaRegistry()
-        let all = registry.all()
+        let all: [AppSchema] = available
+            ? SchemaRegistry.bundledBuiltins()
+            : SchemaRegistry().all()
 
         let filtered = all.filter { schema in
             let isInstalled = AppDetector.isInstalled(schema)
             if installed && !isInstalled { return false }
             if missing && isInstalled { return false }
-            if user {
-                let src = registry.source(of: schema.id)
-                if src != .config && src != .standalone { return false }
-            }
             return true
         }
 
         if filtered.isEmpty {
-            print("No apps match the given filters.")
+            if available {
+                print("No bundled schemas match the given filters.")
+            } else {
+                print("No configured apps. Run `dotty init` to add some, or `dotty list --available` to browse bundled schemas.")
+            }
             return
         }
 
@@ -78,8 +79,6 @@ struct ListCommand: ParsableCommand {
                 let pad = String(repeating: " ", count: max(0, maxID - schema.id.count))
                 let id = isInstalled ? schema.id : Ansi.dim(schema.id)
                 let name = isInstalled ? schema.name : Ansi.dim(schema.name)
-                let src = registry.source(of: schema.id)
-                let srcTag = (src == .config || src == .standalone) ? "  " + Ansi.cyan("[\(src!.rawValue)]") : ""
                 let modeTag: String = {
                     let hasLink = schema.hasLinkPaths()
                     let hasCopy = schema.hasCopyPaths()
@@ -90,13 +89,14 @@ struct ListCommand: ParsableCommand {
                     case (false, false): return ""
                     }
                 }()
-                print("  \(marker) \(id)\(pad)  \(name)\(modeTag)\(srcTag)")
+                print("  \(marker) \(id)\(pad)  \(name)\(modeTag)")
             }
         }
 
         print()
         let total = filtered.count
         let notInstalled = total - installedCount
-        print(Ansi.dim("\(total) apps · \(installedCount) installed · \(notInstalled) not installed"))
+        let header = available ? "bundled" : "configured"
+        print(Ansi.dim("\(total) \(header) apps · \(installedCount) installed · \(notInstalled) not installed"))
     }
 }

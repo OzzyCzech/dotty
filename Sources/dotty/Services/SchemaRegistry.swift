@@ -2,47 +2,11 @@ import Foundation
 
 final class SchemaRegistry {
     private(set) var schemas: [String: AppSchema] = [:]
-    private(set) var sources: [String: SchemaSource] = [:]
     let config: DottyConfig
 
     init(config: DottyConfig = .load()) {
         self.config = config
-        loadBuiltins()
-        applyConfigOverrides()
         loadStandalones()
-    }
-
-    private func loadBuiltins() {
-        guard let urls = Bundle.module.urls(forResourcesWithExtension: "json", subdirectory: nil) else {
-            return
-        }
-        let decoder = JSONDecoder()
-        for url in urls {
-            let id = url.deletingPathExtension().lastPathComponent.lowercased()
-            if let allowed = config.enabledApps, !allowed.contains(id) { continue }
-            if config.disabledApps.contains(id) { continue }
-            guard let data = try? Data(contentsOf: url),
-                  let schema = try? decoder.decode(AppSchema.self, from: data) else { continue }
-            let withID = schema.with(id: id)
-            if !validate(withID, sourceLabel: url.lastPathComponent) { continue }
-            schemas[id] = withID
-            sources[id] = .builtin
-        }
-    }
-
-    private func applyConfigOverrides() {
-        for (id, override) in config.appOverrides {
-            let existing = schemas[id]
-            let name = override.name ?? existing?.name ?? id
-            let paths = override.paths ?? existing?.paths ?? []
-            let target = override.target ?? existing?.target
-            guard !paths.isEmpty else { continue }
-            let mergedMode = override.mode ?? existing?.mode
-            let merged = AppSchema(id: id, name: name, paths: paths, target: target, category: existing?.category, mode: mergedMode)
-            if !validate(merged, sourceLabel: "config.json[\(id)]") { continue }
-            schemas[id] = merged
-            sources[id] = .config
-        }
     }
 
     private func loadStandalones() {
@@ -58,7 +22,6 @@ final class SchemaRegistry {
             let withID = schema.with(id: id)
             if !validate(withID, sourceLabel: url.lastPathComponent) { continue }
             schemas[id] = withID
-            sources[id] = .standalone
         }
     }
 
@@ -80,12 +43,24 @@ final class SchemaRegistry {
         schemas.values.sorted { $0.id < $1.id }
     }
 
-    func source(of id: String) -> SchemaSource? {
-        sources[id.lowercased()]
-    }
-
     func backupDir(for schema: AppSchema) -> URL {
         let base = schema.target ?? config.destination
         return URL(fileURLWithPath: Paths.expand(base))
+    }
+
+    /// Reads bundled built-in schemas — used by `dotty init` to populate ~/.dotty/.
+    static func bundledBuiltins() -> [AppSchema] {
+        guard let urls = Bundle.module.urls(forResourcesWithExtension: "json", subdirectory: nil) else {
+            return []
+        }
+        let decoder = JSONDecoder()
+        var result: [AppSchema] = []
+        for url in urls {
+            let id = url.deletingPathExtension().lastPathComponent.lowercased()
+            guard let data = try? Data(contentsOf: url),
+                  let schema = try? decoder.decode(AppSchema.self, from: data) else { continue }
+            result.append(schema.with(id: id))
+        }
+        return result.sorted { $0.id < $1.id }
     }
 }

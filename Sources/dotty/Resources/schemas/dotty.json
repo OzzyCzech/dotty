@@ -1,0 +1,7 @@
+{
+  "name": "dotty",
+  "category": "CLI Utilities",
+  "paths": [
+    "~/.dotty/config.json"
+  ]
+}

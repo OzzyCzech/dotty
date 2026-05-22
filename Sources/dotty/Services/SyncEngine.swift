@@ -26,11 +26,11 @@ final class SyncEngine {
             try? fm.createDirectory(at: backupDir, withIntermediateDirectories: true)
         }
         for spec in schema.paths {
-            let mode = spec.resolvedMode(default: schema.mode)
+            let strategy = spec.resolvedStrategy(default: schema.strategy)
             let src = URL(fileURLWithPath: Paths.expand(spec.source))
             let backup = backupDir.appendingPathComponent(spec.resolvedTarget())
             let outcome: CopyOutcome
-            switch mode {
+            switch strategy {
             case .link:
                 outcome = ensureLink(source: src, backup: backup, direction: direction)
             case .copy:
@@ -38,7 +38,7 @@ final class SyncEngine {
                     ? copyOne(from: src, to: backup)
                     : copyOne(from: backup, to: src)
             }
-            report(path: src.path, outcome: outcome, mode: mode)
+            report(path: src.path, outcome: outcome, strategy: strategy)
         }
     }
 
@@ -119,7 +119,7 @@ final class SyncEngine {
 
     // MARK: - reporting
 
-    private func report(path: String, outcome: CopyOutcome, mode: SyncMode) {
+    private func report(path: String, outcome: CopyOutcome, strategy: SyncStrategy) {
         let display = Paths.short(path)
         let tag = dryRun ? "  \(Ansi.dim("(dry-run)"))" : ""
         switch outcome {

@@ -4,7 +4,7 @@ import Foundation
 struct ListCommand: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "list",
-        abstract: "Show configured apps in ~/.dotty/ (or use --available to browse bundled schemas)."
+        abstract: "Show configured apps in ~/.dotty/. Use `dotty templates` to browse bundled schemas."
     )
 
     @Flag(name: .long, help: "Show only installed apps.")
@@ -12,9 +12,6 @@ struct ListCommand: ParsableCommand {
 
     @Flag(name: .long, help: "Show only apps that are not installed.")
     var missing: Bool = false
-
-    @Flag(name: .long, help: "Show bundled built-in schemas (templates available to `dotty init`), not the configured ones.")
-    var available: Bool = false
 
     @Flag(name: [.short, .long], help: "Compact one-line output (just identifiers).")
     var compact: Bool = false
@@ -33,9 +30,7 @@ struct ListCommand: ParsableCommand {
     ]
 
     func run() throws {
-        let all: [AppSchema] = available
-            ? SchemaRegistry.bundledBuiltins()
-            : SchemaRegistry().all()
+        let all = SchemaRegistry().all()
 
         let filtered = all.filter { schema in
             let isInstalled = AppDetector.isInstalled(schema)
@@ -45,11 +40,7 @@ struct ListCommand: ParsableCommand {
         }
 
         if filtered.isEmpty {
-            if available {
-                print("No bundled schemas match the given filters.")
-            } else {
-                print("No configured apps. Run `dotty init` to add some, or `dotty list --available` to browse bundled schemas.")
-            }
+            print("No configured apps. Run `dotty init` to bootstrap, or `dotty templates` to browse bundled schemas.")
             return
         }
 
@@ -96,7 +87,6 @@ struct ListCommand: ParsableCommand {
         print()
         let total = filtered.count
         let notInstalled = total - installedCount
-        let header = available ? "bundled" : "configured"
-        print(Ansi.dim("\(total) \(header) apps · \(installedCount) installed · \(notInstalled) not installed"))
+        print(Ansi.dim("\(total) configured apps · \(installedCount) installed · \(notInstalled) not installed"))
     }
 }

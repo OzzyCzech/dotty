@@ -36,23 +36,22 @@ cp .build/release/dotty /usr/local/bin/
 ## Usage
 
 ```sh
-dotty init                              # interactive: pick apps, copy templates into ~/.dotty/
-dotty init --yes                        # non-interactive, copy every detected app
-dotty init --destination ~/Dropbox/dot  # skip the destination prompt
-dotty init --refresh                    # overwrite existing ~/.dotty/<id>.json files
-dotty list                              # configured apps in ~/.dotty/, grouped
-dotty list --available                  # browse bundled schema templates (read-only)
-dotty doctor                            # report broken links, missing files
+dotty init                  # interactive bootstrap of ~/.dotty/
+dotty add zed               # add a single app (copies bundled template)
+dotty remove zed            # delete ~/.dotty/zed.json
+dotty edit zed              # open ~/.dotty/zed.json in $EDITOR
+dotty list                  # configured apps in ~/.dotty/
+dotty templates             # browse bundled templates
+dotty templates zed         # print one template's JSON
+dotty doctor                # health check
 
-dotty save                  # push every installed app's config → backup
-dotty save zed              # save a single app
-dotty save --dry-run        # preview only
-
-dotty restore               # apply backup to home (prompts per app)
+dotty save                  # home → backup
+dotty save zed --dry-run    # preview a single app
+dotty restore               # backup → home (prompts per app)
 dotty restore zed --force   # no prompts
 ```
 
-For each path, dotty does the right thing based on its **mode**: copy-mode paths are duplicated to/from the backup directory, link-mode paths are turned into symlinks. Set the mode at the schema level (applies to all paths) or per-path (overrides the schema default).
+For each path, dotty does the right thing based on its **strategy**: `copy` paths are duplicated to/from the backup directory, `link` paths are turned into symlinks. Set the strategy at the schema level (applies to all paths) or per-path (overrides the schema default).
 
 ## Configuration
 
@@ -70,7 +69,7 @@ For each path, dotty does the right thing based on its **mode**: copy-mode paths
 - **`config.json`** holds only the `destination` — the directory where backups live (default `~/.dotty/backup`). That's it.
 - **`<id>.json` files** are the schemas dotty acts on. Each one is a complete, editable description of a single app's config paths. Delete a file to drop the app; add one to manage a new app.
 
-Bundled schemas inside the dotty binary are **templates** used by `dotty init` to bootstrap `~/.dotty/`. They are not loaded at runtime — your local files are. Run `dotty list --available` to browse the bundled templates without modifying anything.
+Bundled schemas inside the dotty binary are **templates** used by `dotty init` / `dotty add` to bootstrap `~/.dotty/`. They are not loaded at runtime — your local files are. Run `dotty templates` to browse the bundled templates without modifying anything.
 
 An app schema:
 
@@ -82,28 +81,28 @@ An app schema:
 }
 ```
 
-### Sync modes
+### Sync strategy
 
-Every path is either a `copy` (snapshot) or a `link` (symlink to the backup). Default is `copy`. Set the mode in three places:
+Every path is either `copy` (snapshot) or `link` (symlink to the backup). Default is `copy`. Set `strategy` at three levels:
 
 ```json
 {
   "name": "Roman's dotfiles",
-  "mode": "link",                                              // default for the whole schema
+  "strategy": "link",                                              // default for the whole schema
   "paths": [
-    "~/.zshrc",                                                // inherits schema mode (link)
-    { "source": "~/.gitconfig", "mode": "copy" },              // per-path override
-    { "source": "~/.bin", "target": "bin" },                   // rename + link
-    { "source": "~/.config/zed", "target": "configs/.config/zed", "mode": "copy" }
+    "~/.zshrc",                                                    // inherits schema strategy (link)
+    { "source": "~/.gitconfig", "strategy": "copy" },              // per-path override
+    { "source": "~/.bin", "target": "bin" },                       // rename + link
+    { "source": "~/.config/zed", "target": "configs/.config/zed", "strategy": "copy" }
   ]
 }
 ```
 
-Resolution order: `path.mode` ► `schema.mode` ► `copy`.
+Resolution order: `path.strategy` ► `schema.strategy` ► `copy`.
 
 ### Path mappings (renaming)
 
-By default each path is mirrored — `~/.zshrc` ends up at `<backup>/.zshrc`. To map a source to a renamed location under the backup directory (e.g. for an existing `~/.dotfiles` layout that uses different names), set `target` in the object form. `target` is always relative to the backup directory; absolute paths and `..` are rejected at load time. Use the schema-level `target` field to relocate the entire backup root.
+By default each path is mirrored — `~/.zshrc` ends up at `<backup>/.zshrc`. To store a source under a renamed location inside the backup directory (e.g. for an existing `~/.dotfiles` layout), set `target` in the object form. `target` is always relative to the backup directory; absolute paths and `..` are rejected at load time. Use the schema-level `destination` field to relocate the entire backup root for that app.
 
 #### Example: wiring dotty into an existing `~/.dotfiles` repo
 
@@ -113,15 +112,15 @@ Drop `~/.dotty/dotfiles.json`:
 {
   "name": "My dotfiles",
   "category": "Other",
-  "mode": "link",
-  "target": "~/.dotfiles",
+  "strategy": "link",
+  "destination": "~/.dotfiles",
   "paths": [
     "~/.zshrc",
     "~/.p10k.zsh",
     "~/.gitignore",
     { "source": "~/.bin", "target": "bin" },
     { "source": "~/.zsh", "target": "zsh" },
-    { "source": "~/.gitconfig", "mode": "copy" }
+    { "source": "~/.gitconfig", "strategy": "copy" }
   ]
 }
 ```

@@ -18,7 +18,7 @@ struct DoctorCommand: ParsableCommand {
         let destExpanded = Paths.expand(registry.config.destination)
         let destExists = fm.fileExists(atPath: destExpanded)
         let destMark = destExists ? Ansi.green("✓") : Ansi.yellow("○")
-        let destNote = destExists ? Ansi.dim("exists") : Ansi.dim("not created yet")
+        let destNote = destExists ? Ansi.dim("exists") : Ansi.dim("(created automatically on first save)")
         print("  \(destMark) \(registry.config.destination)  \(destNote)")
         print()
 

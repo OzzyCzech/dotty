@@ -4,7 +4,7 @@ import Foundation
 struct RestoreCommand: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "restore",
-        abstract: "Apply backup to home — copies files and ensures symlinks.",
+        abstract: "backup → home. Copies files, ensures symlinks for link-strategy paths.",
         discussion: """
         For copy-mode paths, the backup is copied back to the source location
         (overwriting existing files — confirm per-app unless --force).

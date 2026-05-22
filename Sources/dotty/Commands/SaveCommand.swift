@@ -4,7 +4,7 @@ import Foundation
 struct SaveCommand: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "save",
-        abstract: "Push current config from home to the backup directory.",
+        abstract: "home → backup. Copies files, ensures symlinks for link-strategy paths.",
         discussion: """
         For copy-mode paths, the source file is copied to the backup directory.
         For link-mode paths, the source is moved into the backup directory and

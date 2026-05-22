@@ -44,7 +44,7 @@ final class SchemaRegistry {
     }
 
     func backupDir(for schema: AppSchema) -> URL {
-        let base = schema.target ?? config.destination
+        let base = schema.destination ?? config.destination
         return URL(fileURLWithPath: Paths.expand(base))
     }
 

@@ -1,6 +1,6 @@
 import Foundation
 
-enum SyncMode: String, Codable {
+enum SyncStrategy: String, Codable {
     case copy
     case link
 }

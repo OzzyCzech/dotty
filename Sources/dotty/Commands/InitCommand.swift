@@ -105,11 +105,11 @@ struct InitCommand: ParsableCommand {
         struct Payload: Codable {
             let name: String
             let category: String?
-            let mode: SyncMode?
-            let target: String?
+            let strategy: SyncStrategy?
+            let destination: String?
             let paths: [PathSpec]
         }
-        let payload = Payload(name: schema.name, category: schema.category, mode: schema.mode, target: schema.target, paths: schema.paths)
+        let payload = Payload(name: schema.name, category: schema.category, strategy: schema.strategy, destination: schema.destination, paths: schema.paths)
         let data = try encoder.encode(payload)
         try data.write(to: url)
     }

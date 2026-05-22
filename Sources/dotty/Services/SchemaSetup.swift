@@ -27,6 +27,19 @@ enum SchemaSetup {
         try data.write(to: url)
     }
 
+    /// Writes a minimal placeholder schema for `id` so the user has a starting
+    /// point to edit. Tries to guess a sensible default path from the id.
+    static func writeBlankSchema(id: String, to url: URL) throws {
+        let name = id.prefix(1).uppercased() + id.dropFirst()
+        let payload: [String: Any] = [
+            "name": name,
+            "category": "Other",
+            "paths": ["~/.\(id)"]
+        ]
+        let data = try JSONSerialization.data(withJSONObject: payload, options: [.prettyPrinted, .sortedKeys])
+        try data.write(to: url)
+    }
+
     static func writeRootConfig(destination: String) throws {
         let payload: [String: Any] = ["destination": destination]
         let data = try JSONSerialization.data(withJSONObject: payload, options: [.prettyPrinted, .sortedKeys])

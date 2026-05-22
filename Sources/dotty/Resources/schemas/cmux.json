@@ -1,6 +1,6 @@
 {
   "name": "cmux",
-  "category": "Other",
+  "category": "Terminals",
   "paths": [
     "~/.config/cmux/cmux.json"
   ]

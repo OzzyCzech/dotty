@@ -2,7 +2,9 @@
   "name": "Claude",
   "paths": [
     "~/.claude/settings.json",
+    "~/.claude/CLAUDE.md",
     "~/.claude/commands",
-    "~/.claude/skills"
+    "~/.claude/skills",
+    "~/.claude/plugins"
   ]
 }

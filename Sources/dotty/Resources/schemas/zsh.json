@@ -1,0 +1,9 @@
+{
+  "name": "Zsh",
+  "paths": [
+    "~/.zshrc",
+    "~/.zshenv",
+    "~/.zprofile",
+    "~/.zlogin"
+  ]
+}

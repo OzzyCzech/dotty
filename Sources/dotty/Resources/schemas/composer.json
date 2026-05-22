@@ -1,0 +1,6 @@
+{
+  "name": "Composer",
+  "paths": [
+    "~/.composer/composer.json"
+  ]
+}

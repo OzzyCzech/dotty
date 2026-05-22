@@ -1,0 +1,6 @@
+{
+  "name": "Karabiner-Elements",
+  "paths": [
+    "~/.config/karabiner"
+  ]
+}

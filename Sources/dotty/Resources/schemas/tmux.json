@@ -1,0 +1,7 @@
+{
+  "name": "tmux",
+  "paths": [
+    "~/.tmux.conf",
+    "~/.config/tmux"
+  ]
+}

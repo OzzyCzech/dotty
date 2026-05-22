@@ -67,7 +67,21 @@ To add a new app without editing `config.json`, drop `~/.dotty/<id>.json`:
 
 ## Built-in apps
 
-Zed, Visual Studio Code, Cursor, Terminal, Ghostty, yt-dlp, Ack, Claude, Warp.
+**Editors & IDEs:** Zed, Visual Studio Code, Cursor, Vim, Neovim
+**Terminals:** Terminal, Ghostty, Warp, Alacritty, Kitty, WezTerm
+**Shells & prompt:** Bash, Zsh, Fish, Starship, Powerlevel10k, Antidote, tmux
+**Git tooling:** Git, GitHub CLI, Lazygit
+**Languages & package managers:** npm, Yarn, pnpm, nvm, asdf, Cargo, Ruby, Composer
+**DevOps:** AWS CLI, Terraform, Docker
+**CLI utilities:** SSH, GnuPG, curl, htop, btop, bat, ripgrep, fd, Ack, yt-dlp
+**macOS apps:** Karabiner-Elements, Hammerspoon, AeroSpace
+**Other:** Claude, cmux
+
+> Run `dotty list` to see the full list with installation status.
+
+### Security note
+
+Built-in schemas for `aws`, `ssh`, `gnupg`, and `docker` intentionally include **only non-secret config files** — never private keys, credentials, or tokens. If you need to back up sensitive material, do it deliberately via your own `~/.dotty/<id>.json` override and pick a private destination.
 
 ## License
 

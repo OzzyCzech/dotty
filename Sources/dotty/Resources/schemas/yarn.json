@@ -1,0 +1,7 @@
+{
+  "name": "Yarn",
+  "paths": [
+    "~/.yarnrc",
+    "~/.yarnrc.yml"
+  ]
+}

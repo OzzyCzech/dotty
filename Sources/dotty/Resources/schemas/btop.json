@@ -1,0 +1,6 @@
+{
+  "name": "btop",
+  "paths": [
+    "~/.config/btop/btop.conf"
+  ]
+}

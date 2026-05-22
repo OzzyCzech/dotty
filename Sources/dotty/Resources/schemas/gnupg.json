@@ -1,0 +1,7 @@
+{
+  "name": "GnuPG",
+  "paths": [
+    "~/.gnupg/gpg.conf",
+    "~/.gnupg/gpg-agent.conf"
+  ]
+}

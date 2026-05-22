@@ -1,0 +1,6 @@
+{
+  "name": "fd",
+  "paths": [
+    "~/.config/fd/ignore"
+  ]
+}

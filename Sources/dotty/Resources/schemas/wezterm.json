@@ -1,0 +1,7 @@
+{
+  "name": "WezTerm",
+  "paths": [
+    "~/.config/wezterm",
+    "~/.wezterm.lua"
+  ]
+}

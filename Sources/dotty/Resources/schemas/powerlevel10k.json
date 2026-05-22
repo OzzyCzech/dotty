@@ -1,0 +1,6 @@
+{
+  "name": "Powerlevel10k",
+  "paths": [
+    "~/.p10k.zsh"
+  ]
+}

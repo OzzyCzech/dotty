@@ -1,0 +1,6 @@
+{
+  "name": "Terraform",
+  "paths": [
+    "~/.terraformrc"
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Kitty",
+  "paths": [
+    "~/.config/kitty"
+  ]
+}

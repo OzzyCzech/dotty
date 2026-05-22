@@ -1,0 +1,9 @@
+{
+  "name": "Bash",
+  "paths": [
+    "~/.bashrc",
+    "~/.bash_profile",
+    "~/.bash_aliases",
+    "~/.inputrc"
+  ]
+}

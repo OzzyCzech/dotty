@@ -1,0 +1,6 @@
+{
+  "name": "npm",
+  "paths": [
+    "~/.npmrc"
+  ]
+}

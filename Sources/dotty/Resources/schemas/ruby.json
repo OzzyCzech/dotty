@@ -1,0 +1,7 @@
+{
+  "name": "Ruby",
+  "paths": [
+    "~/.gemrc",
+    "~/.irbrc"
+  ]
+}

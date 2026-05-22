@@ -1,0 +1,6 @@
+{
+  "name": "Cargo",
+  "paths": [
+    "~/.cargo/config.toml"
+  ]
+}

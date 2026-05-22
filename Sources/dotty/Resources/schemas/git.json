@@ -1,0 +1,8 @@
+{
+  "name": "Git",
+  "paths": [
+    "~/.gitconfig",
+    "~/.gitignore_global",
+    "~/.config/git"
+  ]
+}

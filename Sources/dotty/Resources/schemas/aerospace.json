@@ -1,0 +1,7 @@
+{
+  "name": "AeroSpace",
+  "paths": [
+    "~/.aerospace.toml",
+    "~/.config/aerospace"
+  ]
+}

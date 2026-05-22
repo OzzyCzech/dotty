@@ -1,0 +1,6 @@
+{
+  "name": "nvm",
+  "paths": [
+    "~/.nvmrc"
+  ]
+}

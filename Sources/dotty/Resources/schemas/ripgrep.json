@@ -1,0 +1,6 @@
+{
+  "name": "ripgrep",
+  "paths": [
+    "~/.config/ripgrep/ripgreprc"
+  ]
+}

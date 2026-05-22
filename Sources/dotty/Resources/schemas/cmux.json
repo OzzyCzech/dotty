@@ -1,0 +1,6 @@
+{
+  "name": "cmux",
+  "paths": [
+    "~/.config/cmux/cmux.json"
+  ]
+}

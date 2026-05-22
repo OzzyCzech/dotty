@@ -1,0 +1,7 @@
+{
+  "name": "Docker",
+  "paths": [
+    "~/.docker/config.json",
+    "~/.docker/daemon.json"
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "name": "AWS CLI",
+  "paths": [
+    "~/.aws/config"
+  ]
+}

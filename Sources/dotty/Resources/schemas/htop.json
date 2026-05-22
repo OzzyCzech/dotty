@@ -1,0 +1,6 @@
+{
+  "name": "htop",
+  "paths": [
+    "~/.config/htop/htoprc"
+  ]
+}

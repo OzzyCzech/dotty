@@ -1,0 +1,6 @@
+{
+  "name": "bat",
+  "paths": [
+    "~/.config/bat"
+  ]
+}

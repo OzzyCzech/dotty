@@ -1,0 +1,6 @@
+{
+  "name": "curl",
+  "paths": [
+    "~/.curlrc"
+  ]
+}

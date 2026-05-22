@@ -1,0 +1,6 @@
+{
+  "name": "pnpm",
+  "paths": [
+    "~/.config/pnpm"
+  ]
+}

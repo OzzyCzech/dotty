@@ -1,0 +1,6 @@
+{
+  "name": "Hammerspoon",
+  "paths": [
+    "~/.hammerspoon"
+  ]
+}

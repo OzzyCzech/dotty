@@ -1,0 +1,6 @@
+{
+  "name": "Alacritty",
+  "paths": [
+    "~/.config/alacritty"
+  ]
+}

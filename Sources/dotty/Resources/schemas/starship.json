@@ -1,0 +1,6 @@
+{
+  "name": "Starship",
+  "paths": [
+    "~/.config/starship.toml"
+  ]
+}

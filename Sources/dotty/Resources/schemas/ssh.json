@@ -1,0 +1,6 @@
+{
+  "name": "SSH",
+  "paths": [
+    "~/.ssh/config"
+  ]
+}

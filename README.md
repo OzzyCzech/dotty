@@ -37,7 +37,9 @@ cp .build/release/dotty /usr/local/bin/
 ## Usage
 
 ```sh
-dotty init                  # interactive bootstrap of ~/.dotty/
+dotty init                  # first-time setup of ~/.dotty/
+dotty reinit                # reconfigure: picker preselects current; deselecting removes
+dotty reinit --refresh      # also overwrite kept schemas with bundled templates
 dotty add zed               # add a single app (copies bundled template)
 dotty remove zed            # delete ~/.dotty/zed.json
 dotty edit zed              # open ~/.dotty/zed.json in $EDITOR

@@ -61,7 +61,7 @@ dotty snapshot              # plain copy home → destination (no symlinks)
 | real file | empty | move home → destination + symlink |
 | empty | real file/dir | create symlink → destination |
 | symlink → destination | — | no-op (already linked) |
-| both populated | — | conflict; you resolve manually |
+| both populated | — | conflict — rerun with `--prefer home` or `--prefer destination` |
 
 ## Configuration
 

@@ -1,6 +1,8 @@
 import ArgumentParser
 import Foundation
 
+extension ConflictPreference: ExpressibleByArgument {}
+
 struct LinkCommand: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "link",
@@ -12,12 +14,17 @@ struct LinkCommand: ParsableCommand {
           • home file exists, destination empty  → move home → destination + symlink
           • destination exists, home empty       → create symlink pointing at destination
           • home already symlinks to destination → no-op
-          • both home and destination exist      → conflict, asks you to resolve manually
+          • both home and destination exist      → conflict; rerun with --prefer
+                                                    home (overwrite destination) or
+                                                    destination (overwrite home)
         """
     )
 
     @Argument(help: "App identifier (omit to link all configured apps).")
     var app: String?
+
+    @Option(name: .long, help: "On conflict, prefer 'home' or 'destination'.")
+    var prefer: ConflictPreference?
 
     @Flag(name: .long, help: "Preview without writing.")
     var dryRun: Bool = false
@@ -38,7 +45,7 @@ struct LinkCommand: ParsableCommand {
             targets = registry.all()
         }
 
-        let engine = SyncEngine(dryRun: dryRun, verbose: verbose)
+        let engine = SyncEngine(dryRun: dryRun, verbose: verbose, prefer: prefer)
         for (i, schema) in targets.enumerated() {
             if i > 0 { print() }
             engine.run(operation: .link, schema: schema, destinationDir: registry.destinationDir(for: schema))

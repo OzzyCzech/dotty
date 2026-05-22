@@ -8,19 +8,26 @@ enum SyncOperation {
     case snapshot   // pure copy home → destination
 }
 
+enum ConflictPreference: String, CaseIterable {
+    case home          // home version wins; overwrite destination, then symlink
+    case destination   // destination version wins; overwrite home, then symlink
+}
+
 final class SyncEngine {
     private let fm = FileManager.default
     private let dryRun: Bool
     private let verbose: Bool
+    private let prefer: ConflictPreference?
 
     var copied = 0
     var linked = 0
     var skipped = 0
     var failed = 0
 
-    init(dryRun: Bool = false, verbose: Bool = false) {
+    init(dryRun: Bool = false, verbose: Bool = false, prefer: ConflictPreference? = nil) {
         self.dryRun = dryRun
         self.verbose = verbose
+        self.prefer = prefer
     }
 
     func run(operation: SyncOperation, schema: AppSchema, destinationDir: URL) {
@@ -78,7 +85,23 @@ final class SyncEngine {
                 return .failed(error)
             }
         case (true, true):
-            return .skipped(reason: "conflict: both source and destination exist; resolve manually")
+            switch prefer {
+            case .destination:
+                // Home file is discarded; symlink takes its place.
+                return createSymlink(at: source, target: destination)
+            case .home:
+                // Destination is replaced with home content; then symlink.
+                if dryRun { return .linked }
+                do {
+                    try fm.removeItem(at: destination)
+                    try fm.moveItem(at: source, to: destination)
+                    return createSymlink(at: source, target: destination)
+                } catch {
+                    return .failed(error)
+                }
+            case nil:
+                return .skipped(reason: "conflict: both home and destination have content; rerun with --prefer home or --prefer destination")
+            }
         case (false, false):
             return .skipped(reason: "not found")
         }

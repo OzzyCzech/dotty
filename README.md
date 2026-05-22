@@ -68,6 +68,8 @@ To add a new app without editing `config.json`, drop `~/.dotty/<id>.json`:
 ## Built-in apps
 
 **Editors & IDEs:** Zed, Visual Studio Code, Cursor, Vim, Neovim
+**AI IDEs:** Antigravity, Windsurf, Trae
+**AI CLIs & agents:** Claude, Codex CLI, Gemini CLI, Aider, OpenCode, Goose, Crush, Continue, GitHub Copilot
 **Terminals:** Terminal, Ghostty, Warp, Alacritty, Kitty, WezTerm
 **Shells & prompt:** Bash, Zsh, Fish, Starship, Powerlevel10k, Antidote, tmux
 **Git tooling:** Git, GitHub CLI, Lazygit

@@ -86,7 +86,7 @@ struct InitCommand: ParsableCommand {
         if skipped > 0 {
             print(Ansi.dim("Skipped \(skipped) existing schema file\(skipped == 1 ? "" : "s") (rerun with --refresh to overwrite)."))
         }
-        print(Ansi.dim("Nothing was copied or linked. Edit the schemas as needed, then run `dotty save`."))
+        print(Ansi.dim("Nothing was copied or linked. Edit the schemas as needed, then run `dotty adopt` (one-time bootstrap), `dotty snapshot` (safety copy), or `dotty deploy` (apply destination to home)."))
     }
 
     private func loadExistingSchemaIDs() -> [String] {

@@ -1,21 +1,22 @@
 import ArgumentParser
 import Foundation
 
-struct RestoreCommand: ParsableCommand {
+struct DeployCommand: ParsableCommand {
     static let configuration = CommandConfiguration(
-        commandName: "restore",
-        abstract: "backup → home. Copies files, ensures symlinks for link-strategy paths.",
+        commandName: "deploy",
+        abstract: "Deploy destination state to home — creates symlinks (link strategy) or copies (copy strategy).",
         discussion: """
-        For copy-mode paths, the backup is copied back to the source location
-        (overwriting existing files — confirm per-app unless --force).
-        For link-mode paths, a symlink is created pointing at the backup.
+        Use on a fresh Mac to wire up dotfiles from the destination directory, or
+        any time you want to ensure home matches the destination. For link-strategy
+        paths a symlink is created; for copy-strategy paths the file is copied
+        (with per-app confirmation unless --force is set).
         """
     )
 
-    @Argument(help: "App identifier (omit to restore all).")
+    @Argument(help: "App identifier (omit to deploy all).")
     var app: String?
 
-    @Flag(name: .long, help: "Skip confirmation prompts.")
+    @Flag(name: .long, help: "Skip the per-app confirmation prompt.")
     var force: Bool = false
 
     @Flag(name: .long, help: "Preview without writing.")
@@ -41,11 +42,11 @@ struct RestoreCommand: ParsableCommand {
         var any = false
         for schema in targets {
             if !force, schema.hasCopyPaths() {
-                if !Confirmation.ask("Restore \(schema.name)?") { continue }
+                if !Confirmation.ask("Deploy \(schema.name)?") { continue }
             }
             if any { print() }
             any = true
-            engine.run(direction: .restore, schema: schema, backupDir: registry.backupDir(for: schema))
+            engine.run(operation: .deploy, schema: schema, backupDir: registry.backupDir(for: schema))
         }
         engine.summary()
         if engine.failed > 0 { throw ExitCode(2) }

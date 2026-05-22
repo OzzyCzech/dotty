@@ -2,10 +2,11 @@
 
 A Swift CLI for backing up, restoring, and syncing application config files on macOS.
 
-Each path in a schema declares whether it should live as a **copy** (snapshot) or as a **symlink** to the backup location. Two commands drive everything:
+Three commands cover the lifecycle:
 
-- **`dotty save`** — push current state from home to the backup directory. Copies for copy-mode paths, idempotent symlinks for link-mode paths.
-- **`dotty restore`** — apply backup back onto home. Copies for copy-mode paths, ensures symlinks for link-mode paths.
+- **`dotty snapshot`** — safety copy. Duplicates home dotfiles into the destination directory. Home is untouched. Strategy is ignored — everything is copied.
+- **`dotty adopt`** — bootstrap. Moves home dotfiles into the destination directory and replaces them with symlinks (for link-strategy paths). Set this up once, then put the destination directory in git and edit through the symlinks.
+- **`dotty deploy`** — apply destination to home. Creates symlinks (link strategy) or copies files (copy strategy). Use on a fresh Mac.
 
 ## Install
 
@@ -45,13 +46,17 @@ dotty schemas               # browse bundled schemas
 dotty schemas zed           # print one schema's JSON
 dotty doctor                # health check
 
-dotty save                  # home → backup
-dotty save zed --dry-run    # preview a single app
-dotty restore               # backup → home (prompts per app)
-dotty restore zed --force   # no prompts
+dotty snapshot              # home → destination (pure copy; safety net)
+dotty snapshot zed --dry-run
+
+dotty adopt                 # one-time bootstrap: move home → destination + symlink back
+dotty adopt zed
+
+dotty deploy                # destination → home (symlinks for link strategy, copies for copy strategy)
+dotty deploy zed --force    # no per-app prompt
 ```
 
-For each path, dotty does the right thing based on its **strategy**: `copy` paths are duplicated to/from the backup directory, `link` paths are turned into symlinks. Set the strategy at the schema level (applies to all paths) or per-path (overrides the schema default).
+For each path, dotty does the right thing based on its **strategy**: `link` paths become symlinks pointing at the destination directory (so edits go straight to your git repo); `copy` paths are duplicated. `snapshot` is the escape hatch that always copies.
 
 ## Configuration
 
@@ -125,7 +130,7 @@ Drop `~/.dotty/dotfiles.json`:
 }
 ```
 
-Then `dotty restore dotfiles --dry-run` previews the result; `dotty restore dotfiles --force` performs it. Existing symlinks pointing at the right target are no-ops.
+Then `dotty adopt dotfiles --dry-run` previews the move + symlink step (run once on the machine where the dotfiles currently live); `dotty deploy dotfiles --dry-run` previews wiring up symlinks on a fresh machine where the destination is already populated. Existing symlinks pointing at the right target are no-ops.
 
 ## Built-in apps
 

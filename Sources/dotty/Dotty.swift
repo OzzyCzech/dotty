@@ -5,7 +5,7 @@ struct Dotty: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "dotty",
         abstract: "Back up, restore, and sync application config files.",
-        version: "0.5.1",
+        version: "0.6.0",
         subcommands: [
             InitCommand.self,
             AddCommand.self,
@@ -14,8 +14,9 @@ struct Dotty: ParsableCommand {
             ListCommand.self,
             SchemasCommand.self,
             DoctorCommand.self,
-            SaveCommand.self,
-            RestoreCommand.self,
+            SnapshotCommand.self,
+            AdoptCommand.self,
+            DeployCommand.self,
         ]
     )
 }

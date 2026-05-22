@@ -1,18 +1,18 @@
 import ArgumentParser
 import Foundation
 
-struct SaveCommand: ParsableCommand {
+struct SnapshotCommand: ParsableCommand {
     static let configuration = CommandConfiguration(
-        commandName: "save",
-        abstract: "home → backup. Copies files, ensures symlinks for link-strategy paths.",
+        commandName: "snapshot",
+        abstract: "Pure copy of home dotfiles into the destination directory. Ignores strategy.",
         discussion: """
-        For copy-mode paths, the source file is copied to the backup directory.
-        For link-mode paths, the source is moved into the backup directory and
-        replaced with a symlink (idempotent — already-linked paths are skipped).
+        Use this for a safety copy without committing to symlinks. Home files are
+        untouched. Every path is copied (even link-strategy paths). Run this any
+        time you want a fresh snapshot.
         """
     )
 
-    @Argument(help: "App identifier (omit to save all installed apps).")
+    @Argument(help: "App identifier (omit to snapshot all installed apps).")
     var app: String?
 
     @Flag(name: .long, help: "Preview without writing.")
@@ -37,7 +37,7 @@ struct SaveCommand: ParsableCommand {
         let engine = SyncEngine(dryRun: dryRun, verbose: verbose)
         for (i, schema) in targets.enumerated() {
             if i > 0 { print() }
-            engine.run(direction: .save, schema: schema, backupDir: registry.backupDir(for: schema))
+            engine.run(operation: .snapshot, schema: schema, backupDir: registry.backupDir(for: schema))
         }
         engine.summary()
         if engine.failed > 0 { throw ExitCode(2) }

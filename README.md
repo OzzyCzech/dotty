@@ -11,11 +11,12 @@ Two modes:
 
 ### Prebuilt universal binary
 
-Download the latest release and drop the binary on your `PATH`:
+Direct download: **[dotty-macos-universal.tar.gz](https://github.com/OzzyCzech/dotty/releases/latest/download/dotty-macos-universal.tar.gz)** ([checksum](https://github.com/OzzyCzech/dotty/releases/latest/download/dotty-macos-universal.tar.gz.sha256))
+
+One-liner install:
 
 ```sh
-VERSION=$(curl -s https://api.github.com/repos/OzzyCzech/dotty/releases/latest | grep tag_name | cut -d '"' -f4)
-curl -L "https://github.com/OzzyCzech/dotty/releases/download/${VERSION}/dotty-${VERSION#v}-macos-universal.tar.gz" \
+curl -L https://github.com/OzzyCzech/dotty/releases/latest/download/dotty-macos-universal.tar.gz \
   | tar -xz -C /usr/local/bin
 xattr -d com.apple.quarantine /usr/local/bin/dotty 2>/dev/null || true
 dotty --version

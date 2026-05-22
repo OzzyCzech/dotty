@@ -44,7 +44,7 @@ jobs:
           file "$BIN"
           lipo -info "$BIN"
           "$BIN" --version
-          ARCHIVE="dotty-${{ steps.version.outputs.version }}-macos-universal.tar.gz"
+          ARCHIVE="dotty-macos-universal.tar.gz"
           tar -C "$(dirname "$BIN")" -czf "$ARCHIVE" dotty
           shasum -a 256 "$ARCHIVE" > "$ARCHIVE.sha256"
           echo "archive=$ARCHIVE" >> "$GITHUB_OUTPUT"

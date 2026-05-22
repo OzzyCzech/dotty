@@ -3,14 +3,20 @@ import Foundation
 struct PathSpec: Equatable {
     let source: String
     let target: String?
+    let mode: SyncMode?
 
-    init(source: String, target: String? = nil) {
+    init(source: String, target: String? = nil, mode: SyncMode? = nil) {
         self.source = source
         self.target = target
+        self.mode = mode
     }
 
     func resolvedTarget() -> String {
         target ?? Paths.relativeToBackupRoot(absolute: Paths.expand(source))
+    }
+
+    func resolvedMode(default schemaMode: SyncMode?) -> SyncMode {
+        mode ?? schemaMode ?? .copy
     }
 
     func validate() throws {
@@ -45,7 +51,7 @@ enum PathSpecError: Error, CustomStringConvertible {
 
 extension PathSpec: Codable {
     enum CodingKeys: String, CodingKey {
-        case source, target
+        case source, target, mode
     }
 
     init(from decoder: Decoder) throws {
@@ -53,21 +59,24 @@ extension PathSpec: Codable {
            let str = try? container.decode(String.self) {
             self.source = str
             self.target = nil
+            self.mode = nil
             return
         }
         let c = try decoder.container(keyedBy: CodingKeys.self)
         self.source = try c.decode(String.self, forKey: .source)
         self.target = try? c.decode(String.self, forKey: .target)
+        self.mode = try? c.decode(SyncMode.self, forKey: .mode)
     }
 
     func encode(to encoder: Encoder) throws {
-        if let target {
-            var c = encoder.container(keyedBy: CodingKeys.self)
-            try c.encode(source, forKey: .source)
-            try c.encode(target, forKey: .target)
-        } else {
+        if target == nil && mode == nil {
             var c = encoder.singleValueContainer()
             try c.encode(source)
+        } else {
+            var c = encoder.container(keyedBy: CodingKeys.self)
+            try c.encode(source, forKey: .source)
+            if let target { try c.encode(target, forKey: .target) }
+            if let mode { try c.encode(mode, forKey: .mode) }
         }
     }
 }

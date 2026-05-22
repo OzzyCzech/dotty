@@ -36,7 +36,8 @@ struct DottyConfig {
             }
             let target = dict["target"] as? String
             let name = dict["name"] as? String
-            overrides[key.lowercased()] = AppSchemaOverride(paths: paths, target: target, name: name)
+            let mode = (dict["mode"] as? String).flatMap { SyncMode(rawValue: $0) }
+            overrides[key.lowercased()] = AppSchemaOverride(paths: paths, target: target, name: name, mode: mode)
         }
         return DottyConfig(destination: destination, appOverrides: overrides, disabledApps: disabled, enabledApps: enabled)
     }

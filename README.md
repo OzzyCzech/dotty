@@ -2,10 +2,10 @@
 
 A Swift CLI for backing up, restoring, and syncing application config files on macOS.
 
-Two modes:
+Each path in a schema declares whether it should live as a **copy** (snapshot) or as a **symlink** to the backup location. Two commands drive everything:
 
-- **Copy mode** (`backup` / `restore`) — snapshot-based, safe, explicit.
-- **Symlink mode** (`link` / `unlink`) — continuous sync via symlinks to a shared location (Dropbox, iCloud, etc.).
+- **`dotty save`** — push current state from home to the backup directory. Copies for copy-mode paths, idempotent symlinks for link-mode paths.
+- **`dotty restore`** — apply backup back onto home. Copies for copy-mode paths, ensures symlinks for link-mode paths.
 
 ## Install
 
@@ -42,16 +42,15 @@ dotty list                              # all known apps, grouped
 dotty list --installed --compact        # filter + one-line output
 dotty doctor                            # report broken links, missing files
 
-dotty backup                # back up all installed apps
-dotty backup zed            # back up a single app
-dotty backup --dry-run      # preview only
+dotty save                  # push every installed app's config → backup
+dotty save zed              # save a single app
+dotty save --dry-run        # preview only
 
-dotty restore               # prompts per app
+dotty restore               # apply backup to home (prompts per app)
 dotty restore zed --force   # no prompts
-
-dotty link zed              # move source → backup, symlink in place
-dotty unlink zed            # replace symlink with real copy
 ```
+
+For each path, dotty does the right thing based on its **mode**: copy-mode paths are duplicated to/from the backup directory, link-mode paths are turned into symlinks. Set the mode at the schema level (applies to all paths) or per-path (overrides the schema default).
 
 ## Configuration
 
@@ -85,22 +84,28 @@ To add a new app without editing `config.json`, drop `~/.dotty/<id>.json`:
 }
 ```
 
-### Path mappings (renaming)
+### Sync modes
 
-By default each path is mirrored — `~/.zshrc` ends up at `<backup>/.zshrc`. To map a source to a renamed location under the backup directory (e.g. for an existing `~/.dotfiles` layout that uses different names), use the object form:
+Every path is either a `copy` (snapshot) or a `link` (symlink to the backup). Default is `copy`. Set the mode in three places:
 
 ```json
 {
-  "name": "My dotfiles",
+  "name": "Roman's dotfiles",
+  "mode": "link",                                              // default for the whole schema
   "paths": [
-    "~/.zshrc",
-    { "source": "~/.bin", "target": "bin" },
-    { "source": "~/.config", "target": "configs/.config" }
+    "~/.zshrc",                                                // inherits schema mode (link)
+    { "source": "~/.gitconfig", "mode": "copy" },              // per-path override
+    { "source": "~/.bin", "target": "bin" },                   // rename + link
+    { "source": "~/.config/zed", "target": "configs/.config/zed", "mode": "copy" }
   ]
 }
 ```
 
-`target` is always relative to the backup directory; absolute paths and `..` are rejected at load time. Use the schema-level `target` field to relocate the entire backup root.
+Resolution order: `path.mode` ► `schema.mode` ► `copy`.
+
+### Path mappings (renaming)
+
+By default each path is mirrored — `~/.zshrc` ends up at `<backup>/.zshrc`. To map a source to a renamed location under the backup directory (e.g. for an existing `~/.dotfiles` layout that uses different names), set `target` in the object form. `target` is always relative to the backup directory; absolute paths and `..` are rejected at load time. Use the schema-level `target` field to relocate the entire backup root.
 
 #### Example: wiring dotty into an existing `~/.dotfiles` repo
 
@@ -109,18 +114,21 @@ Drop `~/.dotty/dotfiles.json`:
 ```json
 {
   "name": "My dotfiles",
+  "category": "Other",
+  "mode": "link",
   "target": "~/.dotfiles",
   "paths": [
     "~/.zshrc",
     "~/.p10k.zsh",
     "~/.gitignore",
     { "source": "~/.bin", "target": "bin" },
-    { "source": "~/.zsh", "target": "zsh" }
+    { "source": "~/.zsh", "target": "zsh" },
+    { "source": "~/.gitconfig", "mode": "copy" }
   ]
 }
 ```
 
-Then `dotty link dotfiles --dry-run` previews the symlinks; `dotty link dotfiles` performs them (existing symlinks pointing at the right target are no-ops).
+Then `dotty restore dotfiles --dry-run` previews the result; `dotty restore dotfiles --force` performs it. Existing symlinks pointing at the right target are no-ops.
 
 ### Schema priority (highest first)
 

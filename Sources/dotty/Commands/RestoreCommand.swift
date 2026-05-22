@@ -4,7 +4,12 @@ import Foundation
 struct RestoreCommand: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "restore",
-        abstract: "Copy from backup directory to original location."
+        abstract: "Apply backup to home — copies files and ensures symlinks.",
+        discussion: """
+        For copy-mode paths, the backup is copied back to the source location
+        (overwriting existing files — confirm per-app unless --force).
+        For link-mode paths, a symlink is created pointing at the backup.
+        """
     )
 
     @Argument(help: "App identifier (omit to restore all).")
@@ -32,19 +37,17 @@ struct RestoreCommand: ParsableCommand {
             targets = registry.all()
         }
 
-        let copier = FileCopier(dryRun: dryRun, verbose: verbose)
+        let engine = SyncEngine(dryRun: dryRun, verbose: verbose)
         var any = false
         for schema in targets {
-            if !force {
-                if !Confirmation.ask("Restore \(schema.name)?") {
-                    continue
-                }
+            if !force, schema.hasCopyPaths() {
+                if !Confirmation.ask("Restore \(schema.name)?") { continue }
             }
             if any { print() }
             any = true
-            copier.restore(schema: schema, backupDir: registry.backupDir(for: schema))
+            engine.run(direction: .restore, schema: schema, backupDir: registry.backupDir(for: schema))
         }
-        copier.summary()
-        if copier.failed > 0 { throw ExitCode(2) }
+        engine.summary()
+        if engine.failed > 0 { throw ExitCode(2) }
     }
 }

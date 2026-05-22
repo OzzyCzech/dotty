@@ -79,8 +79,18 @@ struct ListCommand: ParsableCommand {
                 let id = isInstalled ? schema.id : Ansi.dim(schema.id)
                 let name = isInstalled ? schema.name : Ansi.dim(schema.name)
                 let src = registry.source(of: schema.id)
-                let tag = (src == .config || src == .standalone) ? "  " + Ansi.cyan("[\(src!.rawValue)]") : ""
-                print("  \(marker) \(id)\(pad)  \(name)\(tag)")
+                let srcTag = (src == .config || src == .standalone) ? "  " + Ansi.cyan("[\(src!.rawValue)]") : ""
+                let modeTag: String = {
+                    let hasLink = schema.hasLinkPaths()
+                    let hasCopy = schema.hasCopyPaths()
+                    switch (hasLink, hasCopy) {
+                    case (true, true):   return "  " + Ansi.dim("mixed")
+                    case (true, false):  return "  " + Ansi.dim("link")
+                    case (false, true):  return ""
+                    case (false, false): return ""
+                    }
+                }()
+                print("  \(marker) \(id)\(pad)  \(name)\(modeTag)\(srcTag)")
             }
         }
 

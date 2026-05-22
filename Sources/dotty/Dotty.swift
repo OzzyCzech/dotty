@@ -10,10 +10,8 @@ struct Dotty: ParsableCommand {
             InitCommand.self,
             ListCommand.self,
             DoctorCommand.self,
-            BackupCommand.self,
+            SaveCommand.self,
             RestoreCommand.self,
-            LinkCommand.self,
-            UnlinkCommand.self,
         ]
     )
 }

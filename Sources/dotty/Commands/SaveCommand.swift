@@ -1,13 +1,18 @@
 import ArgumentParser
 import Foundation
 
-struct LinkCommand: ParsableCommand {
+struct SaveCommand: ParsableCommand {
     static let configuration = CommandConfiguration(
-        commandName: "link",
-        abstract: "Replace source files with symlinks to backup directory."
+        commandName: "save",
+        abstract: "Push current config from home to the backup directory.",
+        discussion: """
+        For copy-mode paths, the source file is copied to the backup directory.
+        For link-mode paths, the source is moved into the backup directory and
+        replaced with a symlink (idempotent — already-linked paths are skipped).
+        """
     )
 
-    @Argument(help: "App identifier (omit to link all installed apps).")
+    @Argument(help: "App identifier (omit to save all installed apps).")
     var app: String?
 
     @Flag(name: .long, help: "Preview without writing.")
@@ -29,12 +34,12 @@ struct LinkCommand: ParsableCommand {
             targets = registry.all().filter { AppDetector.isInstalled($0) }
         }
 
-        let manager = SymlinkManager(dryRun: dryRun, verbose: verbose)
+        let engine = SyncEngine(dryRun: dryRun, verbose: verbose)
         for (i, schema) in targets.enumerated() {
             if i > 0 { print() }
-            manager.link(schema: schema, backupDir: registry.backupDir(for: schema))
+            engine.run(direction: .save, schema: schema, backupDir: registry.backupDir(for: schema))
         }
-        manager.summary()
-        if manager.failed > 0 { throw ExitCode(2) }
+        engine.summary()
+        if engine.failed > 0 { throw ExitCode(2) }
     }
 }

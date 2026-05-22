@@ -37,7 +37,8 @@ final class SchemaRegistry {
             let paths = override.paths ?? existing?.paths ?? []
             let target = override.target ?? existing?.target
             guard !paths.isEmpty else { continue }
-            let merged = AppSchema(id: id, name: name, paths: paths, target: target, category: existing?.category)
+            let mergedMode = override.mode ?? existing?.mode
+            let merged = AppSchema(id: id, name: name, paths: paths, target: target, category: existing?.category, mode: mergedMode)
             if !validate(merged, sourceLabel: "config.json[\(id)]") { continue }
             schemas[id] = merged
             sources[id] = .config

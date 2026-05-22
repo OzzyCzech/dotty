@@ -19,9 +19,11 @@ cp .build/release/dotty /usr/local/bin/
 ## Usage
 
 ```sh
-dotty init                  # create ~/.dotty/config.json
-dotty list                  # show all known apps
-dotty doctor                # report config health
+dotty init                              # create ~/.dotty/config.json
+dotty init --destination ~/Dropbox/dot  # custom backup root
+dotty list                              # all known apps, grouped
+dotty list --installed --compact        # filter + one-line output
+dotty doctor                            # report broken links, missing files
 
 dotty backup                # back up all installed apps
 dotty backup zed            # back up a single app
@@ -75,6 +77,26 @@ By default each path is mirrored — `~/.zshrc` ends up at `<backup>/.zshrc`. To
 ```
 
 `target` is always relative to the backup directory; absolute paths and `..` are rejected at load time. Use the schema-level `target` field to relocate the entire backup root.
+
+#### Example: wiring dotty into an existing `~/.dotfiles` repo
+
+Drop `~/.dotty/dotfiles.json`:
+
+```json
+{
+  "name": "My dotfiles",
+  "target": "~/.dotfiles",
+  "paths": [
+    "~/.zshrc",
+    "~/.p10k.zsh",
+    "~/.gitignore",
+    { "source": "~/.bin", "target": "bin" },
+    { "source": "~/.zsh", "target": "zsh" }
+  ]
+}
+```
+
+Then `dotty link dotfiles --dry-run` previews the symlinks; `dotty link dotfiles` performs them (existing symlinks pointing at the right target are no-ops).
 
 ### Schema priority (highest first)
 

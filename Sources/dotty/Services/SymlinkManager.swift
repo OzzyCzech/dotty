@@ -16,18 +16,18 @@ final class SymlinkManager {
 
     func link(schema: AppSchema, backupDir: URL) {
         print(schema.name)
-        for path in schema.paths {
-            let src = URL(fileURLWithPath: Paths.expand(path))
-            let backup = backupDir.appendingPathComponent(Paths.relativeToBackupRoot(absolute: src.path))
+        for spec in schema.paths {
+            let src = URL(fileURLWithPath: Paths.expand(spec.source))
+            let backup = backupDir.appendingPathComponent(spec.resolvedTarget())
             report(path: src.path, outcome: linkOne(source: src, backup: backup))
         }
     }
 
     func unlink(schema: AppSchema, backupDir: URL) {
         print(schema.name)
-        for path in schema.paths {
-            let src = URL(fileURLWithPath: Paths.expand(path))
-            let backup = backupDir.appendingPathComponent(Paths.relativeToBackupRoot(absolute: src.path))
+        for spec in schema.paths {
+            let src = URL(fileURLWithPath: Paths.expand(spec.source))
+            let backup = backupDir.appendingPathComponent(spec.resolvedTarget())
             report(path: src.path, outcome: unlinkOne(source: src, backup: backup))
         }
     }

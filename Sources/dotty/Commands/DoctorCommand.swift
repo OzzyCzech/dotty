@@ -81,12 +81,12 @@ struct DoctorCommand: ParsableCommand {
             findings.append(Finding(text: Ansi.dim("not installed"), isError: false))
         }
         let backupDir = registry.backupDir(for: schema)
-        for path in schema.paths {
-            let expanded = Paths.expand(path)
+        for spec in schema.paths {
+            let expanded = Paths.expand(spec.source)
             let exists = fm.fileExists(atPath: expanded)
             let attrs = try? fm.attributesOfItem(atPath: expanded)
             let isLink = (attrs?[.type] as? FileAttributeType) == .typeSymbolicLink
-            let backupPath = backupDir.appendingPathComponent(Paths.relativeToBackupRoot(absolute: expanded))
+            let backupPath = backupDir.appendingPathComponent(spec.resolvedTarget())
             let backupExists = fm.fileExists(atPath: backupPath.path)
 
             if isLink {

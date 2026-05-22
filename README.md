@@ -59,6 +59,23 @@ To add a new app without editing `config.json`, drop `~/.dotty/<id>.json`:
 }
 ```
 
+### Path mappings (renaming)
+
+By default each path is mirrored — `~/.zshrc` ends up at `<backup>/.zshrc`. To map a source to a renamed location under the backup directory (e.g. for an existing `~/.dotfiles` layout that uses different names), use the object form:
+
+```json
+{
+  "name": "My dotfiles",
+  "paths": [
+    "~/.zshrc",
+    { "source": "~/.bin", "target": "bin" },
+    { "source": "~/.config", "target": "configs/.config" }
+  ]
+}
+```
+
+`target` is always relative to the backup directory; absolute paths and `..` are rejected at load time. Use the schema-level `target` field to relocate the entire backup root.
+
 ### Schema priority (highest first)
 
 1. `~/.dotty/<id>.json` — standalone, full replacement.

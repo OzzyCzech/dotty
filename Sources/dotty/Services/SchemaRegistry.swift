@@ -21,7 +21,9 @@ final class SchemaRegistry {
             guard let data = try? Data(contentsOf: url),
                   let schema = try? decoder.decode(AppSchema.self, from: data) else { continue }
             let id = url.deletingPathExtension().lastPathComponent.lowercased()
-            schemas[id] = schema.with(id: id)
+            let withID = schema.with(id: id)
+            if !validate(withID, sourceLabel: url.lastPathComponent) { continue }
+            schemas[id] = withID
             sources[id] = .builtin
         }
     }
@@ -33,7 +35,9 @@ final class SchemaRegistry {
             let paths = override.paths ?? existing?.paths ?? []
             let target = override.target ?? existing?.target
             guard !paths.isEmpty else { continue }
-            schemas[id] = AppSchema(id: id, name: name, paths: paths, target: target, category: existing?.category)
+            let merged = AppSchema(id: id, name: name, paths: paths, target: target, category: existing?.category)
+            if !validate(merged, sourceLabel: "config.json[\(id)]") { continue }
+            schemas[id] = merged
             sources[id] = .config
         }
     }
@@ -48,8 +52,20 @@ final class SchemaRegistry {
             if id == "config" { continue }
             guard let data = try? Data(contentsOf: url),
                   let schema = try? decoder.decode(AppSchema.self, from: data) else { continue }
-            schemas[id] = schema.with(id: id)
+            let withID = schema.with(id: id)
+            if !validate(withID, sourceLabel: url.lastPathComponent) { continue }
+            schemas[id] = withID
             sources[id] = .standalone
+        }
+    }
+
+    private func validate(_ schema: AppSchema, sourceLabel: String) -> Bool {
+        do {
+            try schema.validate()
+            return true
+        } catch {
+            FileHandle.standardError.write(Data("Invalid schema \(sourceLabel): \(error)\n".utf8))
+            return false
         }
     }
 

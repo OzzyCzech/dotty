@@ -19,18 +19,18 @@ final class FileCopier {
         if !dryRun {
             try? fm.createDirectory(at: backupDir, withIntermediateDirectories: true)
         }
-        for path in schema.paths {
-            let src = URL(fileURLWithPath: Paths.expand(path))
-            let dest = backupDir.appendingPathComponent(Paths.relativeToBackupRoot(absolute: src.path))
+        for spec in schema.paths {
+            let src = URL(fileURLWithPath: Paths.expand(spec.source))
+            let dest = backupDir.appendingPathComponent(spec.resolvedTarget())
             report(path: src.path, outcome: copy(from: src, to: dest, requireSource: true))
         }
     }
 
     func restore(schema: AppSchema, backupDir: URL) {
         printHeader(schema.name)
-        for path in schema.paths {
-            let dest = URL(fileURLWithPath: Paths.expand(path))
-            let src = backupDir.appendingPathComponent(Paths.relativeToBackupRoot(absolute: dest.path))
+        for spec in schema.paths {
+            let dest = URL(fileURLWithPath: Paths.expand(spec.source))
+            let src = backupDir.appendingPathComponent(spec.resolvedTarget())
             report(path: dest.path, outcome: copy(from: src, to: dest, requireSource: true))
         }
     }

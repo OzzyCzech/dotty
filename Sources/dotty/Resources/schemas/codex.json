@@ -1,0 +1,9 @@
+{
+  "name": "Codex CLI",
+  "paths": [
+    "~/.codex/config.toml",
+    "~/.codex/AGENTS.md",
+    "~/.codex/instructions.md",
+    "~/.codex/prompts"
+  ]
+}

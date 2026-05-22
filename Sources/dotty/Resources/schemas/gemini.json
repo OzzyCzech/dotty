@@ -1,0 +1,8 @@
+{
+  "name": "Gemini CLI",
+  "paths": [
+    "~/.gemini/settings.json",
+    "~/.gemini/GEMINI.md",
+    "~/.gemini/commands"
+  ]
+}

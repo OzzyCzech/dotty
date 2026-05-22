@@ -1,0 +1,7 @@
+{
+  "name": "OpenCode",
+  "paths": [
+    "~/.config/opencode/config.json",
+    "~/.config/opencode/AGENTS.md"
+  ]
+}

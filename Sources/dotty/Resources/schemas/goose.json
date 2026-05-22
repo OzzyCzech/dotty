@@ -1,0 +1,7 @@
+{
+  "name": "Goose",
+  "paths": [
+    "~/.config/goose/config.yaml",
+    "~/.config/goose/profiles.yaml"
+  ]
+}

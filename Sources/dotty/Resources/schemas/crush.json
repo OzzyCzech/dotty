@@ -1,0 +1,6 @@
+{
+  "name": "Crush",
+  "paths": [
+    "~/.config/crush/crush.json"
+  ]
+}

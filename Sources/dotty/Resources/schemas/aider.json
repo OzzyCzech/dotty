@@ -1,0 +1,8 @@
+{
+  "name": "Aider",
+  "paths": [
+    "~/.aider.conf.yml",
+    "~/.aider.model.metadata.json",
+    "~/.aider.model.settings.yml"
+  ]
+}

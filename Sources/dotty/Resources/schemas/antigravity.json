@@ -1,0 +1,9 @@
+{
+  "name": "Antigravity",
+  "paths": [
+    "~/Library/Application Support/Antigravity/User/settings.json",
+    "~/Library/Application Support/Antigravity/User/keybindings.json",
+    "~/Library/Application Support/Antigravity/User/snippets",
+    "~/Library/Application Support/Antigravity/User/prompts"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "name": "Continue",
+  "paths": [
+    "~/.continue/config.json",
+    "~/.continue/config.yaml",
+    "~/.continue/assistants",
+    "~/.continue/prompts",
+    "~/.continue/rules"
+  ]
+}

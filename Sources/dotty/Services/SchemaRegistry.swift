@@ -18,9 +18,10 @@ final class SchemaRegistry {
         }
         let decoder = JSONDecoder()
         for url in urls {
+            let id = url.deletingPathExtension().lastPathComponent.lowercased()
+            if config.disabledApps.contains(id) { continue }
             guard let data = try? Data(contentsOf: url),
                   let schema = try? decoder.decode(AppSchema.self, from: data) else { continue }
-            let id = url.deletingPathExtension().lastPathComponent.lowercased()
             let withID = schema.with(id: id)
             if !validate(withID, sourceLabel: url.lastPathComponent) { continue }
             schemas[id] = withID

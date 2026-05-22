@@ -60,6 +60,7 @@ dotty unlink zed            # replace symlink with real copy
 ```json
 {
   "destination": "~/Dropbox/dotty",
+  "disabled": ["vim", "fish"],
   "zed": {
     "paths": ["~/.config/zed/settings.json", "~/.config/zed/keymap.json"]
   },
@@ -68,6 +69,10 @@ dotty unlink zed            # replace symlink with real copy
   }
 }
 ```
+
+- `destination` — global backup root. Default `~/.dotty/backup`.
+- `disabled` — IDs of built-in schemas to hide. Doesn't affect entries you define explicitly here or in standalone `~/.dotty/<id>.json` files, so you can disable a built-in and replace it with your own version using the same ID.
+- App key (e.g. `"zed"`) — partial override (paths / target / name).
 
 To add a new app without editing `config.json`, drop `~/.dotty/<id>.json`:
 

@@ -11,7 +11,9 @@ final class SchemaRegistry {
 
     private func loadStandalones() {
         let fm = FileManager.default
-        let dir = Paths.dottyDir
+        // Resolve symlinks — FileManager.contentsOfDirectory(at:) returns ENOTDIR
+        // when the URL points at a symlink-to-directory.
+        let dir = Paths.dottyDir.resolvingSymlinksInPath()
         guard let entries = try? fm.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil) else { return }
         let decoder = JSONDecoder()
         for url in entries where url.pathExtension == "json" {

@@ -5,7 +5,8 @@ import Foundation
 enum SchemaSetup {
     static func loadExistingSchemaIDs() -> [String] {
         let fm = FileManager.default
-        guard let entries = try? fm.contentsOfDirectory(at: Paths.dottyDir, includingPropertiesForKeys: nil) else { return [] }
+        let dir = Paths.dottyDir.resolvingSymlinksInPath()
+        guard let entries = try? fm.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil) else { return [] }
         return entries
             .filter { $0.pathExtension == "json" }
             .map { $0.deletingPathExtension().lastPathComponent.lowercased() }

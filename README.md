@@ -36,8 +36,9 @@ cp .build/release/dotty /usr/local/bin/
 ## Usage
 
 ```sh
-dotty init                              # create ~/.dotty/config.json
-dotty init --destination ~/Dropbox/dot  # custom backup root
+dotty init                              # interactive: pick installed apps to enable
+dotty init --yes                        # non-interactive, accept all detected apps
+dotty init --destination ~/Dropbox/dot  # skip the destination prompt
 dotty list                              # all known apps, grouped
 dotty list --installed --compact        # filter + one-line output
 dotty doctor                            # report broken links, missing files

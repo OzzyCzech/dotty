@@ -1,5 +1,6 @@
 {
   "name": "Aider",
+  "category": "AI Tools",
   "paths": [
     "~/.aider.conf.yml",
     "~/.aider.model.metadata.json",

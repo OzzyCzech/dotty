@@ -1,5 +1,6 @@
 {
   "name": "Fish",
+  "category": "Shell",
   "paths": [
     "~/.config/fish"
   ]

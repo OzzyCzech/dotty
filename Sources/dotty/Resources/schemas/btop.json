@@ -1,5 +1,6 @@
 {
   "name": "btop",
+  "category": "CLI Utilities",
   "paths": [
     "~/.config/btop/btop.conf"
   ]

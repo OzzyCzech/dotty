@@ -1,5 +1,6 @@
 {
   "name": "Terminal",
+  "category": "Terminals",
   "paths": [
     "~/Library/Preferences/com.apple.Terminal.plist"
   ]

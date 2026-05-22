@@ -1,5 +1,6 @@
 {
   "name": "GnuPG",
+  "category": "CLI Utilities",
   "paths": [
     "~/.gnupg/gpg.conf",
     "~/.gnupg/gpg-agent.conf"

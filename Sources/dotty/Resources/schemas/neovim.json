@@ -1,5 +1,6 @@
 {
   "name": "Neovim",
+  "category": "Editors",
   "paths": [
     "~/.config/nvim"
   ]

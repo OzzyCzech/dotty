@@ -1,5 +1,6 @@
 {
   "name": "Windsurf",
+  "category": "AI Tools",
   "paths": [
     "~/Library/Application Support/Windsurf/User/settings.json",
     "~/Library/Application Support/Windsurf/User/keybindings.json",

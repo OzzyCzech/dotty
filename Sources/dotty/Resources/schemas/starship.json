@@ -1,5 +1,6 @@
 {
   "name": "Starship",
+  "category": "Shell",
   "paths": [
     "~/.config/starship.toml"
   ]

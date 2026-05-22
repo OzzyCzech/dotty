@@ -1,5 +1,6 @@
 {
   "name": "Alacritty",
+  "category": "Terminals",
   "paths": [
     "~/.config/alacritty"
   ]

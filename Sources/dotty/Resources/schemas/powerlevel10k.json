@@ -1,5 +1,6 @@
 {
   "name": "Powerlevel10k",
+  "category": "Shell",
   "paths": [
     "~/.p10k.zsh"
   ]

@@ -1,5 +1,6 @@
 {
   "name": "Docker",
+  "category": "DevOps",
   "paths": [
     "~/.docker/config.json",
     "~/.docker/daemon.json"

@@ -1,5 +1,6 @@
 {
   "name": "Trae",
+  "category": "AI Tools",
   "paths": [
     "~/Library/Application Support/Trae/User/settings.json",
     "~/Library/Application Support/Trae/User/keybindings.json",

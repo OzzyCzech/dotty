@@ -1,5 +1,6 @@
 {
   "name": "Hammerspoon",
+  "category": "macOS Apps",
   "paths": [
     "~/.hammerspoon"
   ]

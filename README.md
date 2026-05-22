@@ -67,19 +67,20 @@ To add a new app without editing `config.json`, drop `~/.dotty/<id>.json`:
 
 ## Built-in apps
 
-**Editors & IDEs:** Zed, Visual Studio Code, Cursor, Vim, Neovim
-**AI IDEs:** Antigravity, Windsurf, Trae
-**AI CLIs & agents:** Claude, Codex CLI, Gemini CLI, Aider, OpenCode, Goose, Crush, Continue, GitHub Copilot
-**Terminals:** Terminal, Ghostty, Warp, Alacritty, Kitty, WezTerm
-**Shells & prompt:** Bash, Zsh, Fish, Starship, Powerlevel10k, Antidote, tmux
-**Git tooling:** Git, GitHub CLI, Lazygit
-**Languages & package managers:** npm, Yarn, pnpm, nvm, asdf, Cargo, Ruby, Composer
-**DevOps:** AWS CLI, Terraform, Docker
-**CLI utilities:** SSH, GnuPG, curl, htop, btop, bat, ripgrep, fd, Ack, yt-dlp
-**macOS apps:** Karabiner-Elements, Hammerspoon, AeroSpace
-**Other:** Claude, cmux
+| Category | Apps |
+|---|---|
+| **Editors** | Zed · Visual Studio Code · Cursor · Vim · Neovim |
+| **AI tools** | Claude · Codex CLI · Gemini CLI · Aider · OpenCode · Goose · Crush · Continue · GitHub Copilot · Antigravity · Windsurf · Trae |
+| **Terminals** | Terminal · Ghostty · Warp · Alacritty · Kitty · WezTerm |
+| **Shell & prompt** | Bash · Zsh · Fish · tmux · Starship · Powerlevel10k · Antidote |
+| **Git** | Git · GitHub CLI · Lazygit |
+| **Languages** | npm · Yarn · pnpm · nvm · asdf · Cargo · Ruby · Composer |
+| **DevOps** | AWS CLI · Terraform · Docker |
+| **CLI utilities** | SSH · GnuPG · curl · htop · btop · bat · ripgrep · fd · Ack · yt-dlp |
+| **macOS apps** | Karabiner-Elements · Hammerspoon · AeroSpace |
+| **Other** | cmux |
 
-> Run `dotty list` to see the full list with installation status.
+Run `dotty list` to see the full list with installation status — or `dotty list --installed` / `--missing` / `--user` / `--compact` to filter.
 
 ### Security note
 

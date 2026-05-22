@@ -1,5 +1,6 @@
 {
   "name": "OpenCode",
+  "category": "AI Tools",
   "paths": [
     "~/.config/opencode/config.json",
     "~/.config/opencode/AGENTS.md"

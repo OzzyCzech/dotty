@@ -1,5 +1,6 @@
 {
   "name": "GitHub CLI",
+  "category": "Git",
   "paths": [
     "~/.config/gh/config.yml",
     "~/.config/gh/hosts.yml"

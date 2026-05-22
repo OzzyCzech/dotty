@@ -1,5 +1,6 @@
 {
   "name": "htop",
+  "category": "CLI Utilities",
   "paths": [
     "~/.config/htop/htoprc"
   ]

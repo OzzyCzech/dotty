@@ -1,5 +1,6 @@
 {
   "name": "WezTerm",
+  "category": "Terminals",
   "paths": [
     "~/.config/wezterm",
     "~/.wezterm.lua"

@@ -1,5 +1,6 @@
 {
   "name": "Lazygit",
+  "category": "Git",
   "paths": [
     "~/.config/lazygit"
   ]

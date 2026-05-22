@@ -1,5 +1,6 @@
 {
   "name": "Bash",
+  "category": "Shell",
   "paths": [
     "~/.bashrc",
     "~/.bash_profile",

@@ -1,5 +1,6 @@
 {
   "name": "Ruby",
+  "category": "Languages",
   "paths": [
     "~/.gemrc",
     "~/.irbrc"

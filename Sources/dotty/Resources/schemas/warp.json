@@ -1,5 +1,6 @@
 {
   "name": "Warp",
+  "category": "Terminals",
   "paths": [
     "~/.warp"
   ]

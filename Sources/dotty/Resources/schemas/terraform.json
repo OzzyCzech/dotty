@@ -1,5 +1,6 @@
 {
   "name": "Terraform",
+  "category": "DevOps",
   "paths": [
     "~/.terraformrc"
   ]

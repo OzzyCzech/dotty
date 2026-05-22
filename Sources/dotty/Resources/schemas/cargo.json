@@ -1,5 +1,6 @@
 {
   "name": "Cargo",
+  "category": "Languages",
   "paths": [
     "~/.cargo/config.toml"
   ]

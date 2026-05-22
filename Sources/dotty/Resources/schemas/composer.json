@@ -1,5 +1,6 @@
 {
   "name": "Composer",
+  "category": "Languages",
   "paths": [
     "~/.composer/composer.json"
   ]

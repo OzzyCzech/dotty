@@ -1,5 +1,6 @@
 {
   "name": "SSH",
+  "category": "CLI Utilities",
   "paths": [
     "~/.ssh/config"
   ]

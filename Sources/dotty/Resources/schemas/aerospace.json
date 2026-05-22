@@ -1,5 +1,6 @@
 {
   "name": "AeroSpace",
+  "category": "macOS Apps",
   "paths": [
     "~/.aerospace.toml",
     "~/.config/aerospace"

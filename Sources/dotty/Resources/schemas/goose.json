@@ -1,5 +1,6 @@
 {
   "name": "Goose",
+  "category": "AI Tools",
   "paths": [
     "~/.config/goose/config.yaml",
     "~/.config/goose/profiles.yaml"

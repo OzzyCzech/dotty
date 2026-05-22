@@ -1,5 +1,6 @@
 {
   "name": "AWS CLI",
+  "category": "DevOps",
   "paths": [
     "~/.aws/config"
   ]

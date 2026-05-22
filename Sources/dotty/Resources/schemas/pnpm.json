@@ -1,5 +1,6 @@
 {
   "name": "pnpm",
+  "category": "Languages",
   "paths": [
     "~/.config/pnpm"
   ]

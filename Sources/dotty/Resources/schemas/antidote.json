@@ -1,5 +1,6 @@
 {
   "name": "Antidote",
+  "category": "Shell",
   "paths": [
     "~/.zsh_plugins.txt"
   ]

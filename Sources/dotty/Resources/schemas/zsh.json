@@ -1,5 +1,6 @@
 {
   "name": "Zsh",
+  "category": "Shell",
   "paths": [
     "~/.zshrc",
     "~/.zshenv",

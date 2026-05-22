@@ -1,5 +1,6 @@
 {
   "name": "bat",
+  "category": "CLI Utilities",
   "paths": [
     "~/.config/bat"
   ]

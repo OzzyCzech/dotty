@@ -1,5 +1,6 @@
 {
   "name": "Antigravity",
+  "category": "AI Tools",
   "paths": [
     "~/Library/Application Support/Antigravity/User/settings.json",
     "~/Library/Application Support/Antigravity/User/keybindings.json",

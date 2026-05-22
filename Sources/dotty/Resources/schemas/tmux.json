@@ -1,5 +1,6 @@
 {
   "name": "tmux",
+  "category": "Shell",
   "paths": [
     "~/.tmux.conf",
     "~/.config/tmux"

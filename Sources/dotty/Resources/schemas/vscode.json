@@ -1,5 +1,6 @@
 {
   "name": "Visual Studio Code",
+  "category": "Editors",
   "paths": [
     "~/Library/Application Support/Code/User/settings.json",
     "~/Library/Application Support/Code/User/keybindings.json",

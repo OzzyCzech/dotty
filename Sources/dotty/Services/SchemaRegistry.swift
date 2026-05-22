@@ -33,7 +33,7 @@ final class SchemaRegistry {
             let paths = override.paths ?? existing?.paths ?? []
             let target = override.target ?? existing?.target
             guard !paths.isEmpty else { continue }
-            schemas[id] = AppSchema(id: id, name: name, paths: paths, target: target)
+            schemas[id] = AppSchema(id: id, name: name, paths: paths, target: target, category: existing?.category)
             sources[id] = .config
         }
     }

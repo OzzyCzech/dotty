@@ -1,5 +1,6 @@
 {
   "name": "Cursor",
+  "category": "Editors",
   "paths": [
     "~/Library/Application Support/Cursor/User/snippets",
     "~/Library/Application Support/Cursor/User/settings.json",

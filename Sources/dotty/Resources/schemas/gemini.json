@@ -1,5 +1,6 @@
 {
   "name": "Gemini CLI",
+  "category": "AI Tools",
   "paths": [
     "~/.gemini/settings.json",
     "~/.gemini/GEMINI.md",

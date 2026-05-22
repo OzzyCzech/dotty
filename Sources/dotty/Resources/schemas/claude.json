@@ -1,5 +1,6 @@
 {
   "name": "Claude",
+  "category": "AI Tools",
   "paths": [
     "~/.claude/settings.json",
     "~/.claude/CLAUDE.md",

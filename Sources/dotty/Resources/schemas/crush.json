@@ -1,5 +1,6 @@
 {
   "name": "Crush",
+  "category": "AI Tools",
   "paths": [
     "~/.config/crush/crush.json"
   ]

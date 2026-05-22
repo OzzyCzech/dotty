@@ -1,5 +1,6 @@
 {
   "name": "GitHub Copilot",
+  "category": "AI Tools",
   "paths": [
     "~/.config/github-copilot/apps.json",
     "~/.config/github-copilot/versions.json"

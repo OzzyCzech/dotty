@@ -1,5 +1,6 @@
 {
   "name": "Git",
+  "category": "Git",
   "paths": [
     "~/.gitconfig",
     "~/.gitignore_global",

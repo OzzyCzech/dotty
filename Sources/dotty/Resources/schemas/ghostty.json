@@ -1,5 +1,6 @@
 {
   "name": "Ghostty",
+  "category": "Terminals",
   "paths": [
     "~/Library/Application Support/com.mitchellh.ghostty/config",
     "~/.config/ghostty/config"

@@ -1,5 +1,6 @@
 {
   "name": "Youtube Downloader",
+  "category": "CLI Utilities",
   "paths": [
     "~/.config/yt-dlp.conf"
   ]

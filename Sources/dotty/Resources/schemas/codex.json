@@ -1,5 +1,6 @@
 {
   "name": "Codex CLI",
+  "category": "AI Tools",
   "paths": [
     "~/.codex/config.toml",
     "~/.codex/AGENTS.md",

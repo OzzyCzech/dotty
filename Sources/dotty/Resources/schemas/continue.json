@@ -1,5 +1,6 @@
 {
   "name": "Continue",
+  "category": "AI Tools",
   "paths": [
     "~/.continue/config.json",
     "~/.continue/config.yaml",

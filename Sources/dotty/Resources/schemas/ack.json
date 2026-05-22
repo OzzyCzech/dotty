@@ -1,5 +1,6 @@
 {
   "name": "Ack",
+  "category": "CLI Utilities",
   "paths": [
     "~/.ackrc"
   ]

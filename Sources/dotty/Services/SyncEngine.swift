@@ -1,4 +1,7 @@
 import Foundation
+#if canImport(Darwin)
+import Darwin
+#endif
 
 enum SyncOperation {
     case snapshot   // home → destination, always copy (ignores strategy)
@@ -45,10 +48,31 @@ final class SyncEngine {
         }
     }
 
+    /// Returns the fully-resolved on-disk path via POSIX realpath (follows ALL
+    /// symlinks, including the leaf). Returns nil if the path doesn't exist.
+    /// Swift's URL.resolvingSymlinksInPath only resolves directory components,
+    /// not a symlink leaf — which would miss the "src is a symlink to dest" case.
+    private func resolvedPath(_ url: URL) -> String? {
+        var buf = [CChar](repeating: 0, count: Int(PATH_MAX))
+        guard realpath(url.path, &buf) != nil else { return nil }
+        return String(cString: buf)
+    }
+
     private func copyOne(from src: URL, to dest: URL) -> CopyOutcome {
         guard fm.fileExists(atPath: src.path) else {
             return .skipped(reason: "not found")
         }
+
+        // Safety: if src resolves to the same file as dest (typically because
+        // src is a symlink that already points at dest), refuse to delete-then-copy.
+        // Without this guard we would unlink the file the symlink points to, then
+        // fail to copy from a now-broken source.
+        if let srcResolved = resolvedPath(src),
+           let destResolved = resolvedPath(dest),
+           srcResolved == destResolved {
+            return .skipped(reason: "already in place")
+        }
+
         if dryRun { return .copied }
         do {
             try fm.createDirectory(at: dest.deletingLastPathComponent(), withIntermediateDirectories: true)
@@ -64,17 +88,24 @@ final class SyncEngine {
 
     private func ensureLink(source: URL, backup: URL, operation: SyncOperation) -> CopyOutcome {
         let srcIsSymlink = isSymlink(source)
-        let srcExistsReal = !srcIsSymlink && fm.fileExists(atPath: source.path)
         let backupExists = fm.fileExists(atPath: backup.path)
 
-        // Already linked correctly → no-op
-        if srcIsSymlink, let dest = try? fm.destinationOfSymbolicLink(atPath: source.path) {
-            let resolved = URL(fileURLWithPath: dest, relativeTo: source.deletingLastPathComponent()).standardizedFileURL
-            if resolved.path == backup.standardizedFileURL.path {
+        // Source is a symlink — inspect where it points.
+        if srcIsSymlink {
+            guard let target = try? fm.destinationOfSymbolicLink(atPath: source.path) else {
+                return .skipped(reason: "unreadable symlink")
+            }
+            let resolvedTarget = URL(fileURLWithPath: target, relativeTo: source.deletingLastPathComponent()).standardizedFileURL
+            if resolvedTarget.path == backup.standardizedFileURL.path {
                 return .skipped(reason: "already linked")
             }
+            if !fm.fileExists(atPath: resolvedTarget.path) {
+                return .skipped(reason: "broken symlink → \(target)")
+            }
+            return .skipped(reason: "symlink points elsewhere → \(Paths.short(resolvedTarget.path)); resolve manually")
         }
 
+        let srcExistsReal = fm.fileExists(atPath: source.path)
         switch (srcExistsReal, backupExists, operation) {
         case (false, true, _):
             return createSymlink(at: source, target: backup)
@@ -90,12 +121,10 @@ final class SyncEngine {
         case (true, false, .deploy):
             return .skipped(reason: "destination empty — run `dotty adopt` first")
         case (true, false, .snapshot):
-            // Snapshot for link strategy shouldn't happen (we forced strategy=.copy)
-            return .skipped(reason: "unexpected")
+            return .skipped(reason: "unexpected (snapshot uses copy path)")
         case (true, true, _):
             return .skipped(reason: "conflict: both source and destination exist; resolve manually")
         case (false, false, _):
-            if srcIsSymlink { return .skipped(reason: "broken symlink") }
             return .skipped(reason: "not found")
         }
     }
@@ -130,10 +159,10 @@ final class SyncEngine {
             print("  \(Ansi.cyan("↪")) \(display)\(tag)")
             linked += 1
         case .skipped(let reason):
-            if verbose || (reason != "not found" && reason != "already linked") {
+            if verbose || (reason != "not found" && reason != "already linked" && reason != "already in place") {
                 print("  \(Ansi.dim("−")) \(display)  \(Ansi.dim("(\(reason))"))")
-            } else if reason == "already linked" {
-                print("  \(Ansi.dim("=")) \(display)  \(Ansi.dim("(already linked)"))")
+            } else if reason == "already linked" || reason == "already in place" {
+                print("  \(Ansi.dim("=")) \(display)  \(Ansi.dim("(\(reason))"))")
             }
             skipped += 1
         case .failed(let error):

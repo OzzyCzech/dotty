@@ -1,6 +1,7 @@
 {
   "name": "Terminal",
   "category": "Terminals",
+  "strategy": "copy",
   "paths": [
     "~/Library/Preferences/com.apple.Terminal.plist"
   ]

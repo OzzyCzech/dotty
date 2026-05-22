@@ -16,7 +16,7 @@ struct PathSpec: Equatable {
     }
 
     func resolvedStrategy(default schemaStrategy: SyncStrategy?) -> SyncStrategy {
-        strategy ?? schemaStrategy ?? .copy
+        strategy ?? schemaStrategy ?? .link
     }
 
     func validate() throws {

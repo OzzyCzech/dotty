@@ -4,11 +4,12 @@ struct DottyConfig {
     let destination: String
     let appOverrides: [String: AppSchemaOverride]
     let disabledApps: Set<String>
+    let enabledApps: Set<String>?
 
     static let defaultDestination = "~/.dotty/backup"
 
     static func empty() -> DottyConfig {
-        DottyConfig(destination: defaultDestination, appOverrides: [:], disabledApps: [])
+        DottyConfig(destination: defaultDestination, appOverrides: [:], disabledApps: [], enabledApps: nil)
     }
 
     static func load(from url: URL = Paths.configFile) -> DottyConfig {
@@ -17,11 +18,15 @@ struct DottyConfig {
             return .empty()
         }
         let destination = (json["destination"] as? String) ?? defaultDestination
-        let disabled = Set((json["disabled"] as? [String] ?? []).map { $0.lowercased() })
+        let enabledRaw = json["enabled"] as? [String]
+        let enabled: Set<String>? = enabledRaw.map { Set($0.map { $0.lowercased() }) }
+        let disabled: Set<String> = enabled != nil
+            ? []
+            : Set((json["disabled"] as? [String] ?? []).map { $0.lowercased() })
         var overrides: [String: AppSchemaOverride] = [:]
         let decoder = JSONDecoder()
         for (key, value) in json {
-            if key == "destination" || key == "disabled" { continue }
+            if key == "destination" || key == "disabled" || key == "enabled" { continue }
             guard let dict = value as? [String: Any] else { continue }
             let paths: [PathSpec]?
             if let raw = dict["paths"], let data = try? JSONSerialization.data(withJSONObject: raw) {
@@ -33,6 +38,6 @@ struct DottyConfig {
             let name = dict["name"] as? String
             overrides[key.lowercased()] = AppSchemaOverride(paths: paths, target: target, name: name)
         }
-        return DottyConfig(destination: destination, appOverrides: overrides, disabledApps: disabled)
+        return DottyConfig(destination: destination, appOverrides: overrides, disabledApps: disabled, enabledApps: enabled)
     }
 }

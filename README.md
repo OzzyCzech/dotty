@@ -71,7 +71,9 @@ dotty unlink zed            # replace symlink with real copy
 ```
 
 - `destination` — global backup root. Default `~/.dotty/backup`.
-- `disabled` — IDs of built-in schemas to hide. Doesn't affect entries you define explicitly here or in standalone `~/.dotty/<id>.json` files, so you can disable a built-in and replace it with your own version using the same ID.
+- `enabled` — whitelist of built-in IDs to keep. When present, every other built-in is hidden. Use this when you want a small, curated set.
+- `disabled` — blacklist of built-in IDs to hide. Ignored if `enabled` is also set.
+- Either filter only affects built-ins. Explicit overrides here and standalone `~/.dotty/<id>.json` files always show up, so you can mix-and-match with your own additions.
 - App key (e.g. `"zed"`) — partial override (paths / target / name).
 
 To add a new app without editing `config.json`, drop `~/.dotty/<id>.json`:

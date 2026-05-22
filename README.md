@@ -41,8 +41,8 @@ dotty add zed               # add a single app (copies bundled template)
 dotty remove zed            # delete ~/.dotty/zed.json
 dotty edit zed              # open ~/.dotty/zed.json in $EDITOR
 dotty list                  # configured apps in ~/.dotty/
-dotty templates             # browse bundled templates
-dotty templates zed         # print one template's JSON
+dotty schemas               # browse bundled schemas
+dotty schemas zed           # print one schema's JSON
 dotty doctor                # health check
 
 dotty save                  # home → backup
@@ -69,7 +69,7 @@ For each path, dotty does the right thing based on its **strategy**: `copy` path
 - **`config.json`** holds only the `destination` — the directory where backups live (default `~/.dotty/backup`). That's it.
 - **`<id>.json` files** are the schemas dotty acts on. Each one is a complete, editable description of a single app's config paths. Delete a file to drop the app; add one to manage a new app.
 
-Bundled schemas inside the dotty binary are **templates** used by `dotty init` / `dotty add` to bootstrap `~/.dotty/`. They are not loaded at runtime — your local files are. Run `dotty templates` to browse the bundled templates without modifying anything.
+Bundled schemas inside the dotty binary are used by `dotty init` / `dotty add` to bootstrap `~/.dotty/`. They are not loaded at runtime — your local files are. Run `dotty schemas` to browse the bundled set without modifying anything.
 
 An app schema:
 

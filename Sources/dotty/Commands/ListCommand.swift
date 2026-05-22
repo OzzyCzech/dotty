@@ -4,7 +4,7 @@ import Foundation
 struct ListCommand: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "list",
-        abstract: "Show configured apps in ~/.dotty/. Use `dotty templates` to browse bundled schemas."
+        abstract: "Show configured apps in ~/.dotty/. Use `dotty schemas` to browse bundled schemas."
     )
 
     @Flag(name: .long, help: "Show only installed apps.")
@@ -40,7 +40,7 @@ struct ListCommand: ParsableCommand {
         }
 
         if filtered.isEmpty {
-            print("No configured apps. Run `dotty init` to bootstrap, or `dotty templates` to browse bundled schemas.")
+            print("No configured apps. Run `dotty init` to bootstrap, or `dotty schemas` to browse bundled schemas.")
             return
         }
 

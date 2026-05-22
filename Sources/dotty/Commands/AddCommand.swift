@@ -7,7 +7,7 @@ struct AddCommand: ParsableCommand {
         abstract: "Copy a bundled template into ~/.dotty/<id>.json."
     )
 
-    @Argument(help: "App identifier (see `dotty templates`).")
+    @Argument(help: "App identifier (see `dotty schemas`).")
     var app: String
 
     @Flag(name: .long, help: "Overwrite an existing ~/.dotty/<id>.json file.")
@@ -16,7 +16,7 @@ struct AddCommand: ParsableCommand {
     func run() throws {
         let id = app.lowercased()
         guard let schema = SchemaRegistry.bundledBuiltins().first(where: { $0.id == id }) else {
-            FileHandle.standardError.write(Data("No bundled template for '\(id)'. Run `dotty templates` to list available templates.\n".utf8))
+            FileHandle.standardError.write(Data("No bundled schema for '\(id)'. Run `dotty schemas` to list available schemas.\n".utf8))
             throw ExitCode(1)
         }
 

@@ -1,13 +1,13 @@
 import ArgumentParser
 import Foundation
 
-struct TemplatesCommand: ParsableCommand {
+struct SchemasCommand: ParsableCommand {
     static let configuration = CommandConfiguration(
-        commandName: "templates",
-        abstract: "Browse the bundled schema templates that `dotty add` and `dotty init` can use."
+        commandName: "schemas",
+        abstract: "Browse the bundled schemas that `dotty add` and `dotty init` can use."
     )
 
-    @Argument(help: "Optional app identifier — prints that template's JSON.")
+    @Argument(help: "Optional app identifier — prints that schema's JSON.")
     var app: String?
 
     @Flag(name: [.short, .long], help: "Compact one-line list of identifiers.")
@@ -19,7 +19,7 @@ struct TemplatesCommand: ParsableCommand {
         if let app {
             let id = app.lowercased()
             guard let schema = bundled.first(where: { $0.id == id }) else {
-                FileHandle.standardError.write(Data("No bundled template for '\(id)'.\n".utf8))
+                FileHandle.standardError.write(Data("No bundled schema for '\(id)'.\n".utf8))
                 throw ExitCode(1)
             }
             try printSchema(schema)
@@ -52,7 +52,7 @@ struct TemplatesCommand: ParsableCommand {
             }
         }
         print()
-        print(Ansi.dim("\(bundled.count) bundled templates — run `dotty add <id>` to use one"))
+        print(Ansi.dim("\(bundled.count) bundled schemas — run `dotty add <id>` to use one"))
     }
 
     private func printSchema(_ schema: AppSchema) throws {

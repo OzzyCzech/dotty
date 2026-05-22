@@ -5,7 +5,7 @@ A Swift CLI for backing up, restoring, and syncing application config files on m
 Two modes:
 
 - **Copy mode** (`backup` / `restore`) — snapshot-based, safe, explicit.
-- **Symlink mode** (`link` / `unlink`) — mackup-style continuous sync via symlinks to a shared location (Dropbox, iCloud, etc.).
+- **Symlink mode** (`link` / `unlink`) — continuous sync via symlinks to a shared location (Dropbox, iCloud, etc.).
 
 ## Install
 
